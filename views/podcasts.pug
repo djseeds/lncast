@@ -1,0 +1,9 @@
+extends layout
+
+block variables
+    - var header = "LNCasts"
+block content
+    div#podcasts
+        each podcast in podcasts
+            div.podcast
+                a(href=podcast.path) #{podcast.title}

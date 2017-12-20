@@ -1,4 +1,5 @@
 var express = require('express');
+var session = require('express-session');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -9,6 +10,13 @@ var index = require('./routes/index');
 var podcasts = require('./routes/podcasts');
 
 var app = express();
+
+// Enable express sessions
+app.use(session({
+    secret: require('crypto').randomBytes(64).toString('hex'),
+    resave: false,
+    saveUninitialized: true,
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -32,7 +40,7 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handler
+// Default error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;

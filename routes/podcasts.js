@@ -86,15 +86,59 @@ router.get('/podcast/:podcastName/:episodeHash', function (req, res, next) {
                 else{
                     episode.summary = articles[i]["itunes:summary"]["#"];
                 }
+                // Send episode info
+                res.json(episode);
+            }
+            else {
+                // Episode does not exist in feed
+                // 404
+                var err = new Error('Not Found');
+                err.status = 404;
+                next(err);
+                return;
+            }
+        });
+    });
+});
+
+// GET podcast link
+router.get('/podcast/:podcastName/:episodeHash/link', function (req, res, next) {
+    episode = {
+        podcast: decodeURIComponent(req.params['podcastName']),
+        hash: decodeURIComponent(req.params['episodeHash']),
+    }
+    episodeStr = episode.podcast + "/" + episode.hash;
+
+    // Get episode from feed
+    podcatcher.getFeed(episode.podcast, function (err, results) {
+            if (err) {
+                next(err);
+                return;
+            }
+        podcatcher.getAll(results, function(err, meta, articles) {
+            if (err) {
+                next(err);
+                return;
+            }
+            // Check if episode exists
+            var i = articles.findIndex(function(article) {
+                // Hash guid, compare against query
+                hash = crypto.createHash('md5').update(article['guid']).digest('hex')
+                return hash == episode.hash;
+            });
+
+            if(i >= 0) { 
                 if(req.session.episodes && req.session.episodes.indexOf(episodeStr) >= 0) {
                     // Send over the link!
-                    episode.link = articles[i].link;
-                    res.json(episode);
+                    res.json(articles[i].link);
                 }
                 else {
                     // User has not paid for episode
                     // 402
-                    res.status(402).json(episode);
+                    var err = new Error('Payment Required');
+                    err.status = 402;
+                    next(err);
+                    return;
                 }
             }
             else {

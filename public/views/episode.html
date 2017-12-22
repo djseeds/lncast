@@ -8,13 +8,13 @@
 <div id="episode">
     <h2>{{episode.title}}</h2>
     <p ng-bind-html="episode.summary"></p>
-    <div ng-if="episode.unlocked">
+    <div ng-if="episode.unlocked" ng-cloak>
         <audio controls><source src="{{episode.link}}"></audio>
     </div>
-    <div ng-if="!episode.unlocked && !pay_req_generated">
+    <div ng-if="!episode.unlocked && !pay_req_generated" ng-cloak>
         <button ng-click="getPayReq()" type="button" class="btn btn-default">Buy Episode</button>
     </div>
-    <div ng-if="pay_req_generated">
+    <div ng-if="pay_req_generated && !episode.unlocked">
         <div row>
             <div col->{{pay_req}}</div>
         </div>

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routeParams', function podcastController($scope, $http, $routeParams) {
+angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routeParams', '$timeout', function podcastController($scope, $http, $routeParams, $timeout) {
     $http.get('/api/podcast/' + $routeParams.podcastName + '/' + $routeParams.episodeHash).then(
         function(response){
             $scope.podcastName = $routeParams.podcastName;
@@ -6,6 +6,7 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
             $scope.episode = response.data;
             $scope.episode.unlocked = true;
             $scope.pay_req_generated = false;
+            pollEpisodeLink();
         },
         function(error){
             if(error.status == 402){
@@ -29,6 +30,22 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
             function(error){
                 console.log('Error: ' + error.data);
             });
+    }
+    var pollEpisodeLink = function() {
+        $http.get('/api/podcast/' + $routeParams.podcastName + '/' + $routeParams.episodeHash + '/link').then(
+                function(response){
+                    $scope.episode.link = response.data;
+                    $scope.episode.unlocked = true;
+                },
+                function(error){
+                    if(error.status == 402){
+                        $scope.episode.unlocked = false;
+                        $timeout(pollEpisodeLink, 1000);
+                    }
+                    else {
+                        console.log('Error: ' + error.data);
+                    }
+                });
     }
 }
 ]);

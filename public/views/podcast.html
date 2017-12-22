@@ -8,7 +8,7 @@
 <div id="episode-list">
     <div ng-repeat="episode in episodes">
         <div class="row-fluid">
-            <div class="col-xs-12"> <a ng-href="#!/podcast/{{podcastName}}/{{episode.hash | encodeURIComponent}}">{{episode.title}}</a></div>
+            <div class="col-xs-12"> <a ng-href="#!/podcast/{{podcastName}}/{{episode.hash}}">{{episode.title}}</a></div>
         </div>
     </div>
 </div>

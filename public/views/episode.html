@@ -1,0 +1,26 @@
+<!doctype html>
+
+<div class="jumbotron text-center">
+    <h1>{{podcastName}}<h1>
+</div>
+
+<!-- Episode List -->
+<div id="episode">
+    <h2>{{episode.title}}</h2>
+    <p ng-bind-html="episode.summary"></p>
+    <div ng-if="episode.unlocked">
+        <audio controls><source src="{{episode.link}}"></audio>
+    </div>
+    <div ng-if="!episode.unlocked && !pay_req_generated">
+        <button ng-click="getPayReq()" type="button" class="btn btn-default">Buy Episode</button>
+    </div>
+    <div ng-if="pay_req_generated">
+        <div row>
+            <div col->{{pay_req}}</div>
+        </div>
+        <div row>
+            <div col->Peer: {{pubkey}}@{{hostname}}</div>
+        </div>
+    </div>
+    </div>
+</div>

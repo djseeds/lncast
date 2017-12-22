@@ -1,0 +1,14 @@
+<!doctype html>
+
+<div class="jumbotron text-center">
+    <h1>Podcasts<h1>
+</div>
+
+<!-- Podcast List -->
+<div id="podcast-list">
+    <div ng-repeat="podcast in podcasts">
+        <div class="row-fluid">
+            <div class="col-xs-12"> <a ng-href="#!/podcast/{{podcast.name}}">{{podcast.name}}</a></div>
+        </div>
+    </div>
+</div>

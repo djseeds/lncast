@@ -1,4 +1,5 @@
 var express = require('express');
+var crypto = require('crypto');
 
 var podcatcher = require('podcatcher');
 var lightning = require('../controllers/lightning');
@@ -9,84 +10,92 @@ var router = express.Router();
 // Temporarily add a single feed
 podcatcher.putFeed('NodeUp', 'http://feeds.feedburner.com/NodeUp', function(err, res) {
         if (err) console.log(err);
-        console.log(res);
+        });
+// Temporarily add a single feed
+podcatcher.putFeed('Daily Tech News Show', 'https://www.patreon.com/rss/dtns?auth=WQVIk-pJyPUuJcu2EDSoqZwhNJoSA7-8', function(err, res) {
+        if (err) console.log(err);
         });
 
-/* GET podcast list page. */
-router.get('/', function(req, res, next) {
+/* GET all podcasts. */
+router.get('/podcasts', function(req, res, next) {
     podcatcher.getDB(function(err, results) {
         if (err) console.log(err);
-        var links = [];
+        var podcasts = [];
         results.forEach(function(podcast) {
-            links.push({ title: podcast["key"],
-                path: "http://" + req.get('host') + req.originalUrl + "/" + podcast["key"]})
+            podcasts.push({
+                name: podcast["key"],
+            });
         });
-        res.render('podcasts', {podcasts: links});
-    })
+        res.json(podcasts);
+    });
 });
 
-/* GET podcast page */
-router.get('/:podcastName', function (req, res){
-    podcatcher.getFeed(req.params['podcastName'], function (err, results) {
-        if (err) console.log(err);
+/* GET podcast */
+router.get('/podcast/:podcastName', function (req, res, next){
+    podcastName = decodeURIComponent(req.params['podcastName']);
+    podcatcher.getFeed(podcastName, function (err, results) {
+        if (err) {
+            next(err);
+            return;
+        }
         podcatcher.getAll(results, function(err, meta, articles) {
-            if (err) console.log(err);
+            if (err) {
+                next(err);
+                return;
+            }
             articles.forEach(function(article, i, articles){
-                articles[i]["path"] = "http://" + req.get('host') + req.originalUrl + "/" +  encodeURIComponent(articles[i]["title"]);
+                articles[i].hash = crypto.createHash('md5').update(article['guid']).digest('hex')
             });
-            res.render('episodes', {header: req.params["podcastName"], episodes: articles});
+            res.json(articles);
         });
     });
 });
 
 // GET single podcast episode page
-router.get('/:podcastName/:episodeTitle', function (req, res, next) {
+router.get('/podcast/:podcastName/:episodeHash', function (req, res, next) {
     episode = {
         podcast: decodeURIComponent(req.params['podcastName']),
-        title: decodeURIComponent(req.params['episodeTitle']),
+        hash: decodeURIComponent(req.params['episodeHash']),
     }
-    episodeStr = episode.podcast + "/" + episode.title;
+    episodeStr = episode.podcast + "/" + episode.hash;
 
     // Get episode from feed
     podcatcher.getFeed(episode.podcast, function (err, results) {
-        if (err) console.log(err);
+            if (err) {
+                next(err);
+                return;
+            }
         podcatcher.getAll(results, function(err, meta, articles) {
-            if (err) console.log(err);
+            if (err) {
+                next(err);
+                return;
+            }
             // Check if episode exists
             var i = articles.findIndex(function(article) {
-                return article.title == episode.title;
+                // Hash guid, compare against query
+                hash = crypto.createHash('md5').update(article['guid']).digest('hex')
+                return hash == episode.hash;
             });
 
             if(i >= 0) { 
-                var link = articles[i].link;
-                if(req.session.episodes && req.session.episodes.indexOf(episodeStr) >= 0) {
-                    // User has paid for episode
-                    res.render('player', {header: episode.podcast, header2: episode.title, link: link});
+                // Episode exists
+                if(articles[i]["summary"]){
+                    episode.summary = articles[i].summary;
+                    episode.title = articles[i].title;
                 }
                 else{
-                    console.log(req.session);
-                    console.log(req.sessionID);
-                    // User has not paid for episode
-                    // Generate invoice
-                    // Subscibe invoice
-                    // 402
-                    console.log("Adding invoice!");
-                    lightning.addInvoice(1, function(err, pay_req){
-                        if(err) console.log(err);
-                        // Subscribe to invoice
-                        lightning.emitter.on(pay_req, function(){
-                            if (!req.session.episodes) {
-                                req.session.episodes = [];
-                            }
-                            req.session.episodes.push(episodeStr);
-                            req.session.save();
-                        })
-                    });
-                    var err = new Error('Payment Required');
-                    err.status = 402;
-                    next(err);
+                    episode.summary = articles[i]["itunes:summary"]["#"];
                 }
-
+                if(req.session.episodes && req.session.episodes.indexOf(episodeStr) >= 0) {
+                    // Send over the link!
+                    episode.link = articles[i].link;
+                    res.json(episode);
+                }
+                else {
+                    // User has not paid for episode
+                    // 402
+                    res.status(402).json(episode);
+                }
             }
             else {
                 // Episode does not exist in feed
@@ -94,9 +103,11 @@ router.get('/:podcastName/:episodeTitle', function (req, res, next) {
                 var err = new Error('Not Found');
                 err.status = 404;
                 next(err);
+                return;
             }
         });
     });
 });
+
 
 module.exports = router;

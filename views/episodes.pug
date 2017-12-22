@@ -1,8 +1,0 @@
-extends layout
-
-block content
-    h2= "Episodes"
-    div.episodes
-        each episode in episodes
-            div.episode
-                a(href=episode.path) #{episode.title}

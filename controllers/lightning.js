@@ -10,8 +10,10 @@ var lnrpcDescriptor = grpc.load(__dirname + '/../lnd/lnrpc/rpc.proto');
 var lnrpc = lnrpcDescriptor.lnrpc;
 var lightning = new lnrpc.Lightning('localhost:10009', credentials);
 
+var pubkey = "";
+// Get node pubkey
 lightning.getInfo({}, function(err, response) {
-    console.log('GetInfo:' + JSON.stringify(response));
+    pubkey = response.identity_pubkey;
 });
 
 emitter = new events.EventEmitter();
@@ -27,16 +29,16 @@ invoice_sub.on('data', function(invoice) {
 })
 .on('status', function(status) {
     // Process status
-    //   console.log("Current status" + status);
-    //
 });
 
 module.exports = {
     addInvoice: function(value, callback) {
         lightning.addInvoice({ value: value }, function(err, response) {
-            console.log(response);
             callback(err, response.payment_request)
         });
     },
     emitter,
+    getPubKey: function(){
+        return pubkey;
+    }
 };

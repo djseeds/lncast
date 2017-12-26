@@ -44,7 +44,7 @@ app.use(function(err, req, res, next) {
 });
 
 app.get('*', function(req, res) {
-    res.sendFile('./public/index.html');
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 module.exports = app;

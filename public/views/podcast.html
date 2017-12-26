@@ -1,14 +1,14 @@
 <!doctype html>
 
 <div class="jumbotron text-center">
-    <h1>{{podcastName}}<h1>
+    <h1>{{podcast.title}}<h1>
 </div>
 
 <!-- Episode List -->
 <div id="episode-list">
-    <div ng-repeat="episode in episodes">
+    <div ng-repeat="episode in podcast.episodes">
         <div class="row-fluid">
-            <div class="col-xs-12"> <a ng-href="#!/podcast/{{podcastName}}/{{episode.hash}}">{{episode.title}}</a></div>
+            <div class="col-xs-12"> <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">{{episode.title}}</a></div>
         </div>
     </div>
 </div>

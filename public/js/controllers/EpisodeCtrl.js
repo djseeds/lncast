@@ -1,26 +1,26 @@
 angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routeParams', '$timeout', function podcastController($scope, $http, $routeParams, $timeout) {
-    $http.get('/api/podcast/' + $routeParams.podcastName + '/' + $routeParams.episodeHash).then(
+
+    $scope.pay_req_generated = false;
+
+    $http.get('/api/podcast/' + $routeParams.podcastID + '/' + $routeParams.episodeID).then(
         function(response){
-            $scope.podcastName = $routeParams.podcastName;
-            $scope.hash = $routeParams.episodeHash;
             $scope.episode = response.data;
-            $scope.episode.unlocked = true;
-            $scope.pay_req_generated = false;
-            pollEpisodeLink();
+            $scope.episode.unlocked = false;
         },
         function(error){
-            if(error.status == 402){
-                $scope.podcastName = $routeParams.podcastName;
-                $scope.hash = $routeParams.episodeHash;
-                $scope.episode = error.data;
-                $scope.episode.unlocked = false;
-                $scope.pay_req_generated = false;
-            }
+            console.log('Error: ' + error.data);
+        });
+
+    $http.get('/api/podcast/' + $routeParams.podcastID).then(
+        function(response){
+            $scope.podcast = response.data;
+        },
+        function(error){
             console.log('Error: ' + error.data);
         });
 
     $scope.getPayReq = function() {
-        $http.get('/api/lightning/buy/' + $scope.podcastName + '/' + $scope.hash).then(
+        $http.get('/api/lightning/buy/' + $routeParams.podcastID + '/' + $routeParams.episodeID).then(
             function(response){
                 $scope.pay_req = response.data.pay_req;
                 $scope.pubkey = response.data.pubkey;
@@ -31,8 +31,9 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
                 console.log('Error: ' + error.data);
             });
     }
+
     var pollEpisodeLink = function() {
-        $http.get('/api/podcast/' + $routeParams.podcastName + '/' + $routeParams.episodeHash + '/link').then(
+        $http.get('/api/podcast/' + $routeParams.podcastID + '/' + $routeParams.episodeID + '/link').then(
                 function(response){
                     $scope.episode.link = response.data;
                     $scope.episode.unlocked = true;
@@ -47,6 +48,7 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
                     }
                 });
     }
+    pollEpisodeLink();
 }
 ]);
 

@@ -1,16 +1,5 @@
 app = angular.module('myApp', ['ngRoute', 'ngSanitize']);
 
-app.filter('encodeURIComponent', function($window) {
-    return function(x) {
-        console.log("encodeURIComponent")
-        console.log(x);
-        console.log($window.encodeURIComponent(x));
-        return $window.encodeURIComponent(x);
-    }
-        //return $window.encodeURIComponent;
-
-});
-
 app.config(function ($routeProvider) {
 
     $routeProvider
@@ -27,11 +16,11 @@ app.config(function ($routeProvider) {
             controller: 'PurchasedCtrl'
         })
         //Podcast page
-        .when('/podcast/:podcastName', {
+        .when('/podcast/:podcastID', {
             templateUrl: 'views/podcast.html',
             controller: 'PodcastCtrl'
         })
-        .when('/podcast/:podcastName/:episodeHash', {
+        .when('/podcast/:podcastID/:episodeID', {
             templateUrl: 'views/episode.html',
             controller: 'EpisodeCtrl'
         })

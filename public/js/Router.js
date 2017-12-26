@@ -19,6 +19,13 @@ app.config(function ($routeProvider) {
             templateUrl: 'views/home.html',
             controller: 'MainCtrl'
         })
+        .when('/login', {
+            templateUrl: 'views/login.html'
+        })
+        .when('/purchased', {
+            templateUrl: 'views/podcasts.html',
+            controller: 'PurchasedCtrl'
+        })
         //Podcast page
         .when('/podcast/:podcastName', {
             templateUrl: 'views/podcast.html',
@@ -29,6 +36,6 @@ app.config(function ($routeProvider) {
             controller: 'EpisodeCtrl'
         })
         .otherwise({
-            redirect: '/'
+            redirectTo: '/'
         });
 });

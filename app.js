@@ -5,6 +5,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var httpsRedirect = require('express-https-redirect');
 
 var podcasts = require('./routes/podcasts');
 var lightning = require('./routes/lightning');
@@ -28,9 +29,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Redirect to https
+app.use('*', httpsRedirect());
 
 app.use('/api', podcasts);
 app.use('/api/lightning', lightning)
+
+
 
 // Default error handler
 app.use(function(err, req, res, next) {

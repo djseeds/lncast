@@ -11,7 +11,7 @@ database.addPodcast('NodeUp', 'http://feeds.feedburner.com/NodeUp');
 
 /* GET all podcasts. */
 router.get('/podcasts', function(req, res, next) {
-    database.Podcast.find({}, {"episodes.link":0}, function(err, podcasts) {
+    database.Podcast.find({}, function(err, podcasts) {
         if(err) {
             next(err);
         }
@@ -23,7 +23,8 @@ router.get('/podcasts', function(req, res, next) {
 
 /* GET podcast */
 router.get('/podcast/:podcastID', function (req, res, next){
-    database.Podcast.findById(req.params.podcastID, {"episodes.link":0})
+    database.Podcast.findById(req.params.podcastID/*, {"episodes.link":0}*/)
+        .populate('episodes')
         .exec(function(err, podcast) {
         if(err) {
             next(err);
@@ -36,13 +37,24 @@ router.get('/podcast/:podcastID', function (req, res, next){
 
 // GET single podcast episode page
 router.get('/podcast/:podcastID/:episodeID', function (req, res, next) {
-    database.Podcast.findById(req.params.podcastID, {"episodes.link":0})
+    database.Podcast.findById(req.params.podcastID)
         .exec(function(err, podcast) {
         if(err) {
             next(err);
         }
         else {
-            res.json(podcast.episodes.id(req.params.episodeID));
+            database.Episode.findById(req.params.episodeID)
+                .exec(function(err, episode) {
+                    if(err) {
+                        next(err);
+                    }
+                    else {
+                        res.json({
+                            episode: episode,
+                            podcast: podcast,
+                        });
+                    }
+                });
         }
     })
 });
@@ -54,13 +66,13 @@ router.get('/podcast/:podcastID/:episodeID/link', function (req, res, next) {
             && req.session.purchased[req.params.podcastID]
             && req.session.purchased[req.params.podcastID].indexOf(req.params.episodeID) >= 0) {
         // User has paid for episode
-        database.Podcast.findById(req.params.podcastID)
-            .exec(function(err, podcast) {
+        database.Episode.findById(req.params.episodeID)
+            .exec(function(err, episode) {
                 if(err) {
                     next(err);
                 }
                 else {
-                    res.json(podcast.episodes.id(req.params.episodeID).link);
+                    res.json(episode.link);
                 }
             })
     }

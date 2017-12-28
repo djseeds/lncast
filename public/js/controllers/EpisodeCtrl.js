@@ -4,16 +4,9 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
 
     $http.get('/api/podcast/' + $routeParams.podcastID + '/' + $routeParams.episodeID).then(
         function(response){
-            $scope.episode = response.data;
+            $scope.episode = response.data.episode;
+            $scope.podcast = response.data.podcast;
             $scope.episode.unlocked = false;
-        },
-        function(error){
-            console.log('Error: ' + error.data);
-        });
-
-    $http.get('/api/podcast/' + $routeParams.podcastID).then(
-        function(response){
-            $scope.podcast = response.data;
         },
         function(error){
             console.log('Error: ' + error.data);

@@ -63,7 +63,7 @@ var PodcastSchema = new Schema ({
         title: {type: String, required: true, unique: true},
         description: {type: String},
         author: {type: Schema.ObjectId, ref: 'Author', required: true},
-        episodes: [EpisodeSchema],
+        episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
         categories: [{type: Schema.ObjectId, ref: 'Category'}],
     },
     {
@@ -77,11 +77,26 @@ PodcastSchema.virtual('url').get(function(){
 
 Podcast = mongoose.model('Podcast', PodcastSchema, 'Podcast');
 
+
+var UserSchema = new Schema ({
+    username: String,
+    password: String,
+    purchased: [{podcast: {type: Schema.ObjectId, ref: 'Podcast'}, episodes: [{type: Schema.ObjectId, ref: 'Episode'}]}],
+    owns: [{type: Schema.ObjectId, ref: 'Podcast'}],
+    pubkey: String,
+    address: String,
+});
+
+
+
+User = mongoose.model('User', UserSchema, 'User');
+
 module.exports = {
     Episode: Episode,
     Podcast: Podcast,
     Category: Category,
     Author: Author,
+    User: User,
 }
 
 module.exports.addPodcast = function(title, feed){
@@ -98,17 +113,24 @@ module.exports.addPodcast = function(title, feed){
             }),
         })
         articles.forEach( function(article){
-            podcast.episodes.push(new Episode({
+            episode = new Episode({
                 title: article.title,
                 summary: article.summary,
                 link: article.link,
-            }));
+            });
+            episode.save(function (err) {
+                if(err) {
+                    console.log(err);
+                }
+            })
+            podcast.episodes.push(episode._id);
         });
         meta.categories.forEach( function(category){
             podcast.categories.push(new Category({
                 name: category
             }));
         });
+        console.log(podcast);
         podcast.save(function (err) {
             if(err) {
                 console.log(err);

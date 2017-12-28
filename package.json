@@ -15,8 +15,12 @@
     "grpc": "^1.8.0",
     "mongoose": "^4.13.7",
     "morgan": "~1.9.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^4.4.0",
     "podcatcher": "^0.2.1",
     "pug": "2.0.0-beta11",
-    "serve-favicon": "~2.4.5"
+    "serve-favicon": "~2.4.5",
+    "unique-concat": "^0.2.2"
   }
 }

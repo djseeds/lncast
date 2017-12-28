@@ -7,6 +7,7 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
             $scope.episode = response.data.episode;
             $scope.podcast = response.data.podcast;
             $scope.episode.unlocked = false;
+            pollEpisodeLink();
         },
         function(error){
             console.log('Error: ' + error.data);
@@ -41,7 +42,6 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
                     }
                 });
     }
-    pollEpisodeLink();
 }
 ]);
 

@@ -9,7 +9,16 @@ app.config(function ($routeProvider) {
             controller: 'MainCtrl'
         })
         .when('/login', {
-            templateUrl: 'views/login.html'
+            templateUrl: 'views/login.html',
+            controller: 'LoginCtrl'
+        })
+        .when('/logout', {
+            templateUrl: 'views/home.html',
+            controller: 'LogoutCtrl'
+        })
+        .when('/register', {
+            templateUrl: 'views/register.html',
+            controller: 'RegisterCtrl'
         })
         .when('/purchased', {
             templateUrl: 'views/podcasts.html',

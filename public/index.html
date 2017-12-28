@@ -23,6 +23,9 @@
         <script src="/js/controllers/MainCtrl.js"></script>
         <script src="/js/controllers/PodcastCtrl.js"></script>
         <script src="/js/controllers/EpisodeCtrl.js"></script>
+        <script src="/js/controllers/LoginCtrl.js"></script>
+        <script src="/js/controllers/LogoutCtrl.js"></script>
+        <script src="/js/controllers/RegisterCtrl.js"></script>
     </head>
 
     <!-- Navigation bar setup -->
@@ -40,8 +43,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#!/purchased">Purchased</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item", ng-show="activeUser == undefined">
                     <a class="nav-link" href="#!/login">Login</a>
+                </li>
+                <li class="nav-item", ng-hide="activeUser == undefined">
+                    <a class="nav-link" href="#!/logout">Logout</a>
+                </li>
+                <li class="nav-item", ng-show="activeUser == undefined">
+                    <a class="nav-link" href="#!/register">Create an Account</a>
                 </li>
             </ul>
         </div>

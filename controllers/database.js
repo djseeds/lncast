@@ -1,5 +1,6 @@
 var podcatcher = require('podcatcher');
 var mongoose = require('mongoose');
+var passportLocalMongoose = require('passport-local-mongoose');
 var Schema = mongoose.Schema;
 
 var mongoDB = 'mongodb://127.0.0.1/my_database';
@@ -46,7 +47,7 @@ Category = mongoose.model('Category', CategorySchema, 'Category');
 
 var EpisodeSchema = new Schema(
     {
-        title: {type: String, required: true, unique: true},
+        title: {type: String, required: true},
         summary: {type: String},
         releaseDateTime: {type: Date},
         link: {type: String, required: true},
@@ -65,6 +66,7 @@ var PodcastSchema = new Schema ({
         author: {type: Schema.ObjectId, ref: 'Author', required: true},
         episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
         categories: [{type: Schema.ObjectId, ref: 'Category'}],
+        price: {type: Number},
     },
     {
         toJSON : { virtuals: true },
@@ -79,13 +81,15 @@ Podcast = mongoose.model('Podcast', PodcastSchema, 'Podcast');
 
 
 var UserSchema = new Schema ({
-    username: String,
+    username: {type: String, required: true, unique: true},
     password: String,
-    purchased: [{podcast: {type: Schema.ObjectId, ref: 'Podcast'}, episodes: [{type: Schema.ObjectId, ref: 'Episode'}]}],
+    purchased: [{type: Schema.ObjectId, ref: 'Episode'}],
     owns: [{type: Schema.ObjectId, ref: 'Podcast'}],
     pubkey: String,
     address: String,
 });
+
+UserSchema.plugin(passportLocalMongoose);
 
 
 
@@ -130,7 +134,6 @@ module.exports.addPodcast = function(title, feed){
                 name: category
             }));
         });
-        console.log(podcast);
         podcast.save(function (err) {
             if(err) {
                 console.log(err);

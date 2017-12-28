@@ -59,12 +59,16 @@ router.get('/podcast/:podcastID/:episodeID', function (req, res, next) {
     })
 });
 
+var userHasPurchasedEpisode = function(req, episodeID){
+    // Check session data.
+    return (req.session.purchased != undefined) && req.session.purchased.includes(episodeID);
+}
+
+
 // GET podcast link
 router.get('/podcast/:podcastID/:episodeID/link', function (req, res, next) {
     // If user has paid for episode
-    if(req.session.purchased
-            && req.session.purchased[req.params.podcastID]
-            && req.session.purchased[req.params.podcastID].indexOf(req.params.episodeID) >= 0) {
+    if(userHasPurchasedEpisode(req, req.params.episodeID)) {
         // User has paid for episode
         database.Episode.findById(req.params.episodeID)
             .exec(function(err, episode) {

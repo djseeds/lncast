@@ -20,10 +20,6 @@ app.config(function ($routeProvider) {
             templateUrl: 'views/register.html',
             controller: 'RegisterCtrl'
         })
-        .when('/purchased', {
-            templateUrl: 'views/podcasts.html',
-            controller: 'PurchasedCtrl'
-        })
         //Podcast page
         .when('/podcast/:podcastID', {
             templateUrl: 'views/podcast.html',

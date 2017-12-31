@@ -1,4 +1,5 @@
-var podcatcher = require('podcatcher');
+var parsePodcast = require('node-podcast-parser');
+var request = require('request');
 var mongoose = require('mongoose');
 var passportLocalMongoose = require('passport-local-mongoose');
 var Schema = mongoose.Schema;
@@ -17,6 +18,7 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 var AuthorSchema = new Schema(
     {
         name: {type: String, required: true, unique: true},
+        email: {type: String},
     },
     {
         toJSON: {virtuals: true},
@@ -27,7 +29,7 @@ AuthorSchema.virtual('url').get(function(){
     return '/author/' + this._id;
 });
 
-Author = mongoose.model('Author', AuthorSchema, 'Author');
+var Author = mongoose.model('Author', AuthorSchema, 'Author');
 
 var CategorySchema = new Schema(
     {
@@ -43,14 +45,17 @@ CategorySchema.virtual('url').get(function(){
     return '/api/category/' + this._id;
 });
 
-Category = mongoose.model('Category', CategorySchema, 'Category');
+var Category = mongoose.model('Category', CategorySchema, 'Category');
 
 var EpisodeSchema = new Schema(
     {
+        guid: {type: String, required: true, unique: true},
         title: {type: String, required: true},
-        summary: {type: String},
-        releaseDateTime: {type: Date},
-        link: {type: String, required: true},
+        description: {type: String},
+        image: {type: String},
+        published: {type: Date},
+        duration: {type: Number},
+        enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
     },
     {
         toJSON: {virtuals: true},
@@ -58,14 +63,35 @@ var EpisodeSchema = new Schema(
 
 );
 
-Episode = mongoose.model('Episode', EpisodeSchema, 'Episode');
+var Episode = mongoose.model('Episode', EpisodeSchema, 'Episode');
+
+// Schema for enclosure (attached media)
+var EnclosureSchema = new Schema({
+    filesize: {type: Number},
+    type: {type: String},
+    url: {type: String},
+});
+
+var Enclosure = mongoose.model('Enclosure', EnclosureSchema, 'Enclosure');
+
+// Schema for enclosure (attached media)
+var InvoiceSchema = new Schema({
+    r_hash: Buffer,
+    payment_request: String,
+});
+
+var Invoice = mongoose.model('Invoice', InvoiceSchema, 'Invoice');
 
 var PodcastSchema = new Schema ({
-        title: {type: String, required: true, unique: true},
-        description: {type: String},
-        author: {type: Schema.ObjectId, ref: 'Author', required: true},
-        episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
+        feed: {type: String, required: true, unique: true},
+        title: {type: String, required: true},
+        description: {short: {type: String}, long: {type: String}},
+        link: {type: String},
+        image: {type: String},
+        updated: {type: Date},
         categories: [{type: Schema.ObjectId, ref: 'Category'}],
+        owner: {type: Schema.ObjectId, ref: 'Author'},
+        episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
         price: {type: Number},
     },
     {
@@ -77,68 +103,80 @@ PodcastSchema.virtual('url').get(function(){
     return '/podcast/' + this._id;
 });
 
-Podcast = mongoose.model('Podcast', PodcastSchema, 'Podcast');
-
+var Podcast = mongoose.model('Podcast', PodcastSchema, 'Podcast');
 
 var UserSchema = new Schema ({
     username: {type: String, required: true, unique: true},
     password: String,
-    purchased: [{type: Schema.ObjectId, ref: 'Episode'}],
+    pending: [{
+        invoice: {type: Schema.ObjectId, ref: 'Invoice'},
+        enclosure: {type:  Schema.ObjectId, ref: 'Enclosure'}
+    }],
+    paid: [{type: Schema.ObjectId, ref: 'Invoice'}],
+    purchased: [{type: Schema.ObjectId, ref: 'Enclosure'}],
     owns: [{type: Schema.ObjectId, ref: 'Podcast'}],
     pubkey: String,
     address: String,
+    balance: {type: Number, default: 0},
 });
 
 UserSchema.plugin(passportLocalMongoose);
 
-
-
-User = mongoose.model('User', UserSchema, 'User');
+var User = mongoose.model('User', UserSchema, 'User');
 
 module.exports = {
-    Episode: Episode,
-    Podcast: Podcast,
-    Category: Category,
     Author: Author,
+    Category: Category,
+    Enclosure: Enclosure,
+    Episode: Episode,
+    Invoice: Invoice,
+    Podcast: Podcast,
     User: User,
 }
 
-module.exports.addPodcast = function(title, feed){
-    podcatcher.getAll(feed, function(err, meta, articles){
+module.exports.addPodcast = function(feed, price, callback){
+    request(feed, function(err, res, data) {
         if (err) {
             console.log(err);
-            return;
+            callback(err, null);
         }
-        var podcast = new Podcast( {
-            title: meta.title,
-            description: meta.description,
-            author: new Author({
-                name: meta["itunes:author"]["#"],
-            }),
-        })
-        articles.forEach( function(article){
-            episode = new Episode({
-                title: article.title,
-                summary: article.summary,
-                link: article.link,
-            });
-            episode.save(function (err) {
-                if(err) {
-                    console.log(err);
-                }
-            })
-            podcast.episodes.push(episode._id);
-        });
-        meta.categories.forEach( function(category){
-            podcast.categories.push(new Category({
-                name: category
-            }));
-        });
-        podcast.save(function (err) {
+        parsePodcast(data, function(err, data) {
             if(err) {
                 console.log(err);
-                return err;
+                callback(err, null);
+                return;
             }
-        });
+            var podcast = new Podcast( {
+                feed: feed,
+                title: data.title,
+                description: data.description,
+                link: data.link,
+                image: data.image,
+                updated: data.updated,
+            });
+            data.episodes.forEach( function(article){
+                if(!article.enclosure){
+                    // No audio content
+                    return;
+                }
+                article.enclosure = new Enclosure(article.enclosure);
+                article.enclosure.save();
+                episode = new Episode(article);
+                episode.save(function (err) {
+                    if(err) {
+                        console.log(err);
+                    }
+                })
+                podcast.episodes.push(episode);
+            });
+            podcast.save(function (err) {
+                if(err) {
+                    console.log(err);
+                    callback(err, null);
+                    return;
+                }
+                callback(null, podcast);
+            });
+        })
     })
 }

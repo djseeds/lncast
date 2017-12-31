@@ -1,14 +1,29 @@
 <!doctype html>
 
 <div class="jumbotron text-center">
-    <h1>{{podcast.title}}<h1>
+    <div class="row">
+        <div class="col-2">
+            <img src="{{episode.image || podcast.image}}" class="img-fluid" />
+        </div>
+        <div class="column">
+            <h1>{{podcast.title}}<h1>
+        </div>
+    </div>
 </div>
 
 <!-- Episode List -->
 <div id="episode-list">
     <div ng-repeat="episode in podcast.episodes">
-        <div class="row-fluid">
-            <div class="col-xs-12"> <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">{{episode.title}}</a></div>
-        </div>
+        <div class="row">
+            <!--div class="col-2">
+                <img src="{{episode.image || podcast.image}}" class="img-fluid img-thumbnail" />
+                </div-->
+                <div class="col">
+                    <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">
+                        <h2>{{episode.title}}</h2>
+                        <p ng-bind-html="episode.description" </p>
+                    </a>
+                </div>
     </div>
+</div>
 </div>

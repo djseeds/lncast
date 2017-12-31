@@ -5,6 +5,7 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
     $http.get('/api/podcast/' + $routeParams.podcastID + '/' + $routeParams.episodeID).then(
         function(response){
             $scope.episode = response.data.episode;
+            console.log($scope.episode);
             $scope.podcast = response.data.podcast;
             $scope.episode.unlocked = false;
             pollEpisodeLink();
@@ -14,9 +15,10 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
         });
 
     $scope.getPayReq = function() {
-        $http.get('/api/lightning/buy/' + $routeParams.podcastID + '/' + $routeParams.episodeID).then(
+        $http.get('/api/lightning/buy/' + $scope.episode.enclosure).then(
             function(response){
-                $scope.pay_req = response.data.pay_req;
+                console.log(response.data);
+                $scope.pay_req = response.data.invoice.payment_request;
                 $scope.pubkey = response.data.pubkey;
                 $scope.hostname = response.data.hostname;
                 $scope.pay_req_generated = true;
@@ -27,9 +29,13 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
     }
 
     var pollEpisodeLink = function() {
-        $http.get('/api/podcast/' + $routeParams.podcastID + '/' + $routeParams.episodeID + '/link').then(
+        if(!$scope.episode.enclosure){
+            return;
+        }
+        $http.get('/api/enclosure/' + $scope.episode.enclosure).then(
                 function(response){
-                    $scope.episode.link = response.data;
+                    console.log(response.data);
+                    $scope.episode.enclosure = response.data;
                     $scope.episode.unlocked = true;
                 },
                 function(error){
@@ -42,6 +48,5 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
                     }
                 });
     }
-}
-]);
+}]);
 

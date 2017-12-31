@@ -8,11 +8,11 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var httpsRedirect = require('express-https-redirect');
-var uniqueConcat = require('unique-concat');
 
 var podcasts = require('./routes/podcasts');
 var lightning = require('./routes/lightning');
-var db = require('./controllers/database')
+var db = require('./controllers/database');
+var sessionCtrl = require('./controllers/session');
 
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -30,9 +30,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.use(db.User.createStrategy());
+passport.serializeUser(db.User.serializeUser());
+passport.deserializeUser(db.User.deserializeUser());
 
 app.use(express.static('public'));
 
@@ -51,46 +51,26 @@ app.use('/api', podcasts);
 app.use('/api/lightning', lightning)
 
 app.post('/register', function(req, res, next){
-    db.User.register(new User({ username: req.body.username }), req.body.password, function(err, account){
+    db.User.register(new db.User({ username: req.body.username }), req.body.password, function(err, account){
         if(err) {
+            console.log("Fail");
             console.log(err);
-            next(err);
-            return;
+            return next(err);
         }
         passport.authenticate('local')(req, res, function() {
+            sessionCtrl.synchronizeSession(req);
             res.redirect('/');
         })
     })
 });
 
-var synchronizeSession = function(req){
-    // Add newly purchased episodes to user database
-    db.User.findById(req.user._id, function (err, user) {
-        if(err){
-            console.log(err);
-            return;
-        }
-        if(req.session.purchased){
-            user.purchased = uniqueConcat(user.purchased, req.session.purchased);
-            req.session.purchased = user.purchased;
-            user.save();
-            req.session.save();
-        }
-        else {
-            console.log("Not purchased")
-            req.session.purchased = user.purchased;
-            req.session.save();
-        }
-    })
-}
-
 app.post('/login', passport.authenticate('local'), function(req, res) {
-    console.log("Login");
-    synchronizeSession(req);
+    sessionCtrl.synchronizeSession(req);
     res.redirect('/');
 });
 
 app.post('/logout', function(req, res) {
+    sessionCtrl.resetSession(req);
     req.logout();
     res.redirect('/');
 });

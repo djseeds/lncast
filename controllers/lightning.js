@@ -2,6 +2,7 @@ var grpc = require('grpc');
 var fs = require('fs');
 var os = require('os');
 var events = require('events');
+var db = require('./database')
 
 var certPath = os.homedir() + '/.lnd/tls.cert';
 var lndCert = fs.readFileSync(certPath);
@@ -34,7 +35,14 @@ invoice_sub.on('data', function(invoice) {
 module.exports = {
     addInvoice: function(value, callback) {
         lightning.addInvoice({ value: value }, function(err, response) {
-            callback(err, response.payment_request)
+            if(err){
+                callback(err, null);
+                return;
+            }
+            invoice = new db.Invoice(response);
+            console.log(invoice);
+            invoice.save();
+            callback(null, invoice);
         });
     },
     emitter,

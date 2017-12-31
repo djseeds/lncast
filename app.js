@@ -11,6 +11,7 @@ var httpsRedirect = require('express-https-redirect');
 
 var podcasts = require('./routes/podcasts');
 var lightning = require('./routes/lightning');
+var account = require('./routes/account');
 var db = require('./controllers/database');
 var sessionCtrl = require('./controllers/session');
 
@@ -35,6 +36,8 @@ passport.serializeUser(db.User.serializeUser());
 passport.deserializeUser(db.User.deserializeUser());
 
 app.use(express.static('public'));
+app.use('/node_modules/qrcode-generator', express.static(__dirname + '/node_modules/qrcode-generator'));
+app.use('/node_modules/angular-qrcode', express.static(__dirname + '/node_modules/angular-qrcode'));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -49,6 +52,7 @@ app.use('*', httpsRedirect());
 
 app.use('/api', podcasts);
 app.use('/api/lightning', lightning)
+app.use('/api/account', account);
 
 app.post('/register', function(req, res, next){
     db.User.register(new db.User({ username: req.body.username }), req.body.password, function(err, account){

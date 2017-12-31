@@ -180,3 +180,48 @@ module.exports.addPodcast = function(feed, price, callback){
         })
     })
 }
+
+var payOwnerOfPodcast = function(podcastID, value){
+    User.findOne({"owns":podcastID}, function(err, user){
+        if(err){
+            console.log(err);
+            return;
+        }
+        user.balance += parseInt(value, 10);
+        user.save();
+    })
+}
+
+var payOwnerOfEpisode = function(episodeID, value){
+    Podcast.findOne({"episodes":episodeID}, function(err, podcast){
+        if(err){
+            console.log(err);
+            return;
+        }
+        payOwnerOfPodcast(podcast._id, value);
+    })
+}
+
+module.exports.payOwnerOfEnclosure = function(enclosureID, value){
+    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
+        if(err){
+            console.log(err);
+            return;
+        }
+        payOwnerOfEpisode(episode._id, value);
+    })
+}
+
+module.exports.withdraw = function(userID, value, callback){
+    User.findById(userID, function(err, user){
+        if(err){
+            console.log("Error!")
+            console.log(err);
+            callback(err, null);
+            return;
+        }
+        user.balance -= parseInt(value, 10);
+        user.save();
+        callback(null, user.balance);
+    })
+}

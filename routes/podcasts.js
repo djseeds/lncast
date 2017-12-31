@@ -106,6 +106,8 @@ router.post('/add', function(req, res, next) {
                 return next(err);
             }
             res.json(podcast);
+            req.user.owns.push(podcast._id);
+            req.user.save();
         });
     }
     else {

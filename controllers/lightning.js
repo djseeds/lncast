@@ -1,9 +1,7 @@
 var grpc = require('grpc');
 var fs = require('fs');
-var os = require('os');
-var events = require('events');
-var db = require('./database')
-
+var os = require('os'); var events = require('events');
+var db = require('./database') 
 var certPath = os.homedir() + '/.lnd/tls.cert';
 var lndCert = fs.readFileSync(certPath);
 var credentials = grpc.credentials.createSsl(lndCert);
@@ -43,6 +41,24 @@ module.exports = {
             console.log(invoice);
             invoice.save();
             callback(null, invoice);
+        });
+    },
+
+    sendPayment: function(pay_req, callback) {
+        lightning.sendPaymentSync({ payment_request: pay_req, }, function(err, response){
+            if(response.payment_error){
+                console.log("Error");
+                err = new Error(response.payment_error);
+                console.log(err);
+            }
+            callback(err, response);
+        });
+    },
+
+    decodePayReq: function(pay_req, callback) {
+        lightning.decodePayReq({ pay_req: pay_req, }, function(err, response){
+            console.log("DecodePayReq:" + response);
+            callback(err, response);
         });
     },
     emitter,

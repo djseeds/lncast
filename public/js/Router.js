@@ -1,4 +1,4 @@
-app = angular.module('myApp', ['ngRoute', 'ngSanitize']);
+app = angular.module('myApp', ['ngRoute', 'ngSanitize', 'monospaced.qrcode']);
 
 app.config(function ($routeProvider) {
 

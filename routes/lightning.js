@@ -46,10 +46,14 @@ router.get('/buy/:enclosureID', function (req, res, next) {
                 // Return invoice info
                 response_data.invoice = invoice;
                 res.json(response_data);
-                lightning.emitter.on(invoice.payment_request, function(){
-                    sessionCtrl.removePendingInvoice(req, invoice);
-                    sessionCtrl.addPurchased(req, req.params.enclosureID);
-                })
+                lightning.emitter.on(invoice.payment_request, function(invoice){
+                    console.log(invoice);
+                    if(invoice.settled){
+                        sessionCtrl.removePendingInvoice(req, invoice);
+                        sessionCtrl.addPurchased(req, req.params.enclosureID);
+                        db.payOwnerOfEnclosure(req.params.enclosureID, invoice.value);
+                    }
+                });
             })
         }
     });
@@ -58,4 +62,4 @@ router.get('/buy/:enclosureID', function (req, res, next) {
 });
 
 
-    module.exports = router;
+module.exports = router;

@@ -38,6 +38,7 @@ passport.deserializeUser(db.User.deserializeUser());
 app.use(express.static('public'));
 app.use('/node_modules/qrcode-generator', express.static(__dirname + '/node_modules/qrcode-generator'));
 app.use('/node_modules/angular-qrcode', express.static(__dirname + '/node_modules/angular-qrcode'));
+app.use('/node_modules/ngclipboard', express.static(__dirname + '/node_modules/ngclipboard'));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

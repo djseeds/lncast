@@ -15,25 +15,28 @@
     <h2>{{episode.title}}</h2>
     <p class="mb-2" ng-bind-html="episode.description"></p>
     <div ng-if="episode.unlocked" ng-cloak>
-        <audio controls><source src="{{episode.enclosure.url}}"></audio>
+        <audio controls autoplay><source src="{{episode.enclosure.url}}"></audio>
     </div>
     <div ng-if="!episode.unlocked && !pay_req_generated" ng-cloak>
-        <button ng-click="getPayReq()" type="button" class="btn btn-secondary">Buy Episode</button>
+        <button ng-click="getPayReq()" type="button" class="btn btn-primary">Buy Episode</button>
     </div>
-    <div class="card mb-3" ng-if="pay_req_generated && !episode.unlocked">
-        <div class="card-title m-2">
-            <h3 class="card-title">Lightning Payment Request</h4>
-            <div class="input-group m-2">
+    <div class="card bg-secondary mb-3" ng-if="pay_req_generated && !episode.unlocked">
+        <div class="card-header">Lightning Payment Request</div>
+        <div class="container-fluid">
+            <div class="input-group m-2" max-width="100%">
                 <div class="input-group-addon">⚡</div>
-                <input type="text" class="form-control" value="{{pay_req}}"readonly>
-                <div class="input-group-addon">⚡</div>
+                <input id="pay_req" type="text" class="form-control" value="{{pay_req}}"readonly>
+                <button class="btn btn-secondary" ngclipboard data-clipboard-target="#pay_req"><i class="fa fa-copy"></i></button>
+                <button class="btn btn-secondary" ngclipboard data-target="#req-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
-            <qrcode color="#fff" background="#000" size="200" class="m-2" href="lightning:{{pay_req}}" data="lightning:{{pay_req}}"></qrcode></p>
+            <qrcode size="200" id="req-qrcode" class="collapse m-2" href="lightning:{{pay_req}}" data="lightning:{{pay_req}}"></qrcode></p>
             <div class="input-group m-2">
                 <div class="input-group-addon">Peer:</div>
-                <input type="text" class="form-control" value="{{pubkey}}@{{hostname}}"readonly>
-                <div class="input-group-addon">⚡</div>
+                <input type="text" id="peer" class="form-control" value="{{pubkey}}@{{hostname}}" readonly>
+                <button class="btn btn-secondary" ngclipboard data-clipboard-target="#peer"><i class="fa fa-copy"></i></button>
+                <button class="btn btn-secondary" ngclipboard data-target="#peer-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
+            <qrcode size="200" id="peer-qrcode" class="collapse m-2" data="{{pubkey}}@{{hostname}}"></qrcode></p>
         </div>
     </div>
 </div>

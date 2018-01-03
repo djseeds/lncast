@@ -6,9 +6,11 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
         function(response){
             $scope.episode = response.data.episode;
             console.log($scope.episode);
+            console.log($scope.episode);
             $scope.podcast = response.data.podcast;
+            console.log($scope.podcast);
             $scope.episode.unlocked = false;
-            pollEpisodeLink();
+            pollEpisodeLink(true);
         },
         function(error){
             console.log('Error: ' + error.data);
@@ -22,31 +24,38 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
                 $scope.pubkey = response.data.pubkey;
                 $scope.hostname = response.data.hostname;
                 $scope.pay_req_generated = true;
+                $scope.price = response.data.price;
             },
             function(error){
                 console.log('Error: ' + error.data);
             });
     }
 
-    var pollEpisodeLink = function() {
+    var pollEpisodeLink = function(firstTry) {
         if(!$scope.episode.enclosure){
             return;
         }
-        $http.get('/api/enclosure/' + $scope.episode.enclosure).then(
-                function(response){
-                    console.log(response.data);
-                    $scope.episode.enclosure = response.data;
-                    $scope.episode.unlocked = true;
-                },
-                function(error){
-                    if(error.status == 402){
-                        $scope.episode.unlocked = false;
-                        $timeout(pollEpisodeLink, 1000);
-                    }
-                    else {
-                        console.log('Error: ' + error.data);
-                    }
-                });
+        if(firstTry | $scope.pay_req_generated){
+            $http.get('/api/enclosure/' + $scope.episode.enclosure).then(
+                    function(response){
+                        console.log(response.data);
+                        $scope.episode.enclosure = response.data;
+                        $scope.episode.unlocked = true;
+                    },
+                    function(error){
+                        if(error.status == 402){
+                            $scope.episode.unlocked = false;
+                            $timeout(pollEpisodeLink, 1000, true, false);
+                        }
+                        else {
+                            console.log('Error: ' + error.data);
+                        }
+                    });
+        }
+        else {
+            $timeout(pollEpisodeLink, 1000, true, false);
+
+        }
     }
 }]);
 

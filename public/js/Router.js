@@ -40,4 +40,7 @@ app.config(function ($routeProvider) {
         .otherwise({
             redirectTo: '/'
         });
-});
+})
+.config(['$compileProvider', function($compileProvider){
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|lightning):/);
+}]);

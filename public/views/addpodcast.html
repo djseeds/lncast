@@ -10,6 +10,11 @@
                         <div class="form-group">
                             <label for="feed">RSS Feed</label>
                             <input class="form-control" required="required" placeholder="http://www.feedforall.com/sample.xml" name="feed" ng-model="feed" type="url" autofocus=""> </input>
+                            <small class="form-text">
+                                <div class="alert alert-danger" ng-show="addFailed == true" ng-init="addFailed = false">
+                                    <strong>Failed to add podcast.</strong> Please check your RSS feed and try again.
+                                </div>
+                            </small>
                         </div>
                         <div class="form-group" ng-hide="true">
                             <label for="price">Per-Episode Price</label>

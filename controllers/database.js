@@ -15,53 +15,22 @@ var db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-var AuthorSchema = new Schema(
-    {
-        name: {type: String, required: true, unique: true},
-        email: {type: String},
-    },
-    {
-        toJSON: {virtuals: true},
-    }
-);
-
-AuthorSchema.virtual('url').get(function(){
-    return '/author/' + this._id;
-});
-
-var Author = mongoose.model('Author', AuthorSchema, 'Author');
-
-var CategorySchema = new Schema(
-    {
-        name: {type: String, required: true, unique: true},
-    },
-    {
-        toJSON: {virtuals: true},
-    }
-
-);
-
-CategorySchema.virtual('url').get(function(){
-    return '/api/category/' + this._id;
-});
-
-var Category = mongoose.model('Category', CategorySchema, 'Category');
 
 var EpisodeSchema = new Schema(
-    {
-        guid: {type: String, required: true, unique: true},
-        title: {type: String, required: true},
-        description: {type: String},
-        image: {type: String},
-        published: {type: Date},
-        duration: {type: Number},
-        enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
-    },
-    {
-        toJSON: {virtuals: true},
-    }
+        {
+            guid: {type: String, required: true, unique: true},
+            title: {type: String, required: true},
+            description: {type: String},
+            image: {type: String},
+            published: {type: Date},
+            duration: {type: Number},
+            enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
+        },
+        {
+            toJSON: {virtuals: true},
+        }
 
-);
+        );
 
 var Episode = mongoose.model('Episode', EpisodeSchema, 'Episode');
 
@@ -83,20 +52,18 @@ var InvoiceSchema = new Schema({
 var Invoice = mongoose.model('Invoice', InvoiceSchema, 'Invoice');
 
 var PodcastSchema = new Schema ({
-        feed: {type: String, required: true, unique: true},
-        title: {type: String, required: true},
-        description: {short: {type: String}, long: {type: String}},
-        link: {type: String},
-        image: {type: String},
-        updated: {type: Date},
-        categories: [{type: Schema.ObjectId, ref: 'Category'}],
-        owner: {type: Schema.ObjectId, ref: 'Author'},
-        episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
-        price: {type: Number},
-    },
-    {
-        toJSON : { virtuals: true },
-    }
+    feed: {type: String, required: true, unique: true},
+    title: {type: String, required: true},
+    description: {short: {type: String}, long: {type: String}},
+    link: {type: String},
+    image: {type: String},
+    updated: {type: Date},
+    episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
+    price: {type: Number},
+},
+{
+    toJSON : { virtuals: true },
+}
 );
 
 PodcastSchema.virtual('url').get(function(){
@@ -125,8 +92,6 @@ UserSchema.plugin(passportLocalMongoose);
 var User = mongoose.model('User', UserSchema, 'User');
 
 module.exports = {
-    Author: Author,
-    Category: Category,
     Enclosure: Enclosure,
     Episode: Episode,
     Invoice: Invoice,
@@ -134,50 +99,147 @@ module.exports = {
     User: User,
 }
 
-module.exports.addPodcast = function(feed, price, callback){
+var refreshEpisode = function(episodeGUID){
+    Episode.findOne({"guid": episodeGUID}, function(err, episode){
+        if(err){
+            console.log(err);
+            return;
+        }
+    });
+
+}
+
+var refreshPodcast = function(podcastID){
+    Podcast.findById(podcastID)
+        .populate("episodes")
+        .exec(function(err, podcast){
+            if(err){
+                console.log(err);
+                return;
+            }
+            parseFeed(podcast.feed, function(err, data) {
+                if(err) {
+                    console.log(err);
+                    return;
+                }
+                if(data.updated > podcast.updated){
+                    // Avoid overwriting episodes
+                    var episodes = data.episodes;
+                    delete data.episodes;
+
+                    // Update podcast data
+                    for(var key in data) podcast[key] = data[key];
+
+                    // Remove episodes that are no longer present in RSS feed
+                    podcast.episodes = podcast.episodes.filter(function(oldEpisode){
+                        return episodes.findIndex(function(newEpisode){
+                            return newEpisode.guid == oldEpisode.guid;
+                        }) != -1;
+                    })
+
+
+                    // New episodes are present in RSS episodes and not 
+                    // present in podcast data.
+                    var newEpisodes = episodes.filter(function(newEpisode){
+                        return podcast.episodes.findIndex(function(oldEpisode){
+                            return newEpisode.guid == oldEpisode.guid;
+                        }) == -1;
+
+                    });
+
+                    // Add new episodes
+                    newEpisodes.forEach(function(article){
+                        episode = addEpisode(article);
+                        if(episode) {
+                            podcast.episodes.push(episode);
+                        }
+                    });
+                    podcast.save();
+
+                }
+            });
+
+        });
+}
+
+module.exports.refreshAll = function(){
+    Podcast.find({}, function(err, podcasts){
+        if(err){
+            console.log(err);
+            return;
+        }
+        podcasts.forEach(function(podcast){
+            refreshPodcast(podcast._id);
+        });
+    });
+}
+
+addEpisode = function(article){
+    if(!article.enclosure){
+        // No audio
+        return null;
+    }
+    episode = new Episode(article);
+    episode.enclosure = new Enclosure(article.enclosure);
+    episode.enclosure.save();
+    episode.save(function (err) {
+        if(err) {
+            console.log(err);
+            return null;
+        }
+    });
+    return episode;
+}
+
+parseFeed = function(feed, callback){
     request(feed, function(err, res, data) {
         if (err) {
             console.log(err);
             callback(err, null);
+            return;
         }
         parsePodcast(data, function(err, data) {
+            if (err) {
+                console.log(err);
+                callback(err, null);
+                return;
+            }
+            callback(null, data);
+        });
+
+    })
+}
+
+module.exports.addPodcast = function(feed, price, callback){
+    parseFeed(feed, function(err, data) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+            return;
+        }
+        var podcast = new Podcast( {
+            feed: feed,
+            title: data.title,
+            description: data.description,
+            link: data.link,
+            image: data.image,
+            updated: data.updated,
+            price: price,
+        });
+        data.episodes.forEach( function(article){
+            episode = addEpisode(article);
+            if(episode){
+                podcast.episodes.push(episode);
+            }
+        });
+        podcast.save(function (err) {
             if(err) {
                 console.log(err);
                 callback(err, null);
                 return;
             }
-            var podcast = new Podcast( {
-                feed: feed,
-                title: data.title,
-                description: data.description,
-                link: data.link,
-                image: data.image,
-                updated: data.updated,
-            });
-            data.episodes.forEach( function(article){
-                if(!article.enclosure){
-                    // No audio content
-                    return;
-                }
-                article.enclosure = new Enclosure(article.enclosure);
-                article.enclosure.save();
-                episode = new Episode(article);
-                episode.save(function (err) {
-                    if(err) {
-                        console.log(err);
-                    }
-                })
-                podcast.episodes.push(episode);
-            });
-            podcast.save(function (err) {
-                if(err) {
-                    console.log(err);
-                    callback(err, null);
-                    return;
-                }
-                callback(null, podcast);
-            });
-        })
+            callback(null, podcast);
+        });
     })
 }
 
@@ -212,11 +274,32 @@ module.exports.payOwnerOfEnclosure = function(enclosureID, value){
     })
 }
 
+var getEpisodePrice = function(episodeID, callback){
+    Podcast.findOne({"episodes":episodeID}, function(err, podcast){
+        if(err){
+            console.log(err);
+            callback(err, null)
+        }
+        callback(null, podcast.price);
+    });
+}
+
+module.exports.getEnclosurePrice = function(enclosureID, callback){
+    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
+        if(err){
+            console.log(err);
+            callback(err, null)
+        }
+        getEpisodePrice(episode._id, callback);
+    })
+
+}
+
 module.exports.withdraw = function(userID, value, callback){
     User.findById(userID, function(err, user){
         if(err){
             console.log("Error!")
-            console.log(err);
+                console.log(err);
             callback(err, null);
             return;
         }

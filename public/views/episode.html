@@ -1,14 +1,16 @@
 <!doctype html>
 
 <div class="jumbotron text-center">
-    <div class="row">
-        <div class="col-2">
-            <img src="{{episode.image || podcast.image}}" class="img-fluid" />
+    <a href="#!{{podcast.url}}">
+        <div class="row">
+            <div class="col-2">
+                <img src="{{episode.image || podcast.image}}" class="img-fluid" />
+            </div>
+            <div class="column">
+                <h1>{{podcast.title}}<h1>
+            </div>
         </div>
-        <div class="column">
-            <h1>{{podcast.title}}<h1>
-        </div>
-    </div>
+    </a>
 </div>
 
 <div id="episode">
@@ -18,23 +20,28 @@
         <audio controls autoplay><source src="{{episode.enclosure.url}}"></audio>
     </div>
     <div ng-if="!episode.unlocked && !pay_req_generated" ng-cloak>
-        <button ng-click="getPayReq()" type="button" class="btn btn-primary">Buy Episode</button>
+        <button ng-click="getPayReq()" type="button" class="btn btn-primary">Buy Episode: t${{podcast.price}}</button>
     </div>
     <div class="card bg-secondary mb-3" ng-if="pay_req_generated && !episode.unlocked">
-        <div class="card-header">Lightning Payment Request</div>
+        <div class="card-block m-2">
+            <h4 class="card-title">Lightning Payment Request</h3>
+            <h6 class="card-subtitle">t${{price.usd}} = µt₿{{price.satoshis / 100}}</h3>
+        </div>
         <div class="container-fluid">
+        <!--div class="card-block m-2"-->
             <div class="input-group m-2" max-width="100%">
                 <div class="input-group-addon">⚡</div>
                 <input id="pay_req" type="text" class="form-control" value="{{pay_req}}"readonly>
                 <button class="btn btn-secondary" ngclipboard data-clipboard-target="#pay_req"><i class="fa fa-copy"></i></button>
-                <button class="btn btn-secondary" ngclipboard data-target="#req-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
+                <a class="btn btn-secondary" href="lightning:{{pay_req}}"><i class="fa fa-external-link"></i></a>
+                <button class="btn btn-secondary" data-target="#req-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
             <qrcode size="200" id="req-qrcode" class="collapse m-2" href="lightning:{{pay_req}}" data="lightning:{{pay_req}}"></qrcode></p>
             <div class="input-group m-2">
                 <div class="input-group-addon">Peer:</div>
                 <input type="text" id="peer" class="form-control" value="{{pubkey}}@{{hostname}}" readonly>
                 <button class="btn btn-secondary" ngclipboard data-clipboard-target="#peer"><i class="fa fa-copy"></i></button>
-                <button class="btn btn-secondary" ngclipboard data-target="#peer-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
+                <button class="btn btn-secondary" data-target="#peer-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
             <qrcode size="200" id="peer-qrcode" class="collapse m-2" data="{{pubkey}}@{{hostname}}"></qrcode></p>
         </div>

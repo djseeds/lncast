@@ -1,5 +1,9 @@
 angular.module('myApp').controller('AddPodcastCtrl', ['$rootScope', '$scope', '$http', '$location', function addPodcastController($rootScope, $scope, $http, $location) {
+    if(!$rootScope.activeUser){
+        $location.path('/login');
+    }
     $scope.submit = function(){
+        $scope.addFailed = false;
         $http.post('/api/add', {
             feed: $scope.feed,
             price: 0.01,
@@ -10,6 +14,9 @@ angular.module('myApp').controller('AddPodcastCtrl', ['$rootScope', '$scope', '$
             function(error){
                 if(error.status == 401){
                     $location.path('/login');
+                }
+                else{
+                    $scope.addFailed = true;
                 }
                 console.log('Error: ' + error.data);
             });

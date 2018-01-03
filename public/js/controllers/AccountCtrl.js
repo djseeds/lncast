@@ -1,11 +1,17 @@
-angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', function accountController($scope, $http, $routeParams) {
+angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', '$location', function accountController($scope, $http, $location) {
     $http.get('/api/account').then(
             function(response){
                 $scope.account = response.data;
             },
             function(error){
-                console.log('Error: ' + error);
-            })
+                if(error.status == 401){
+                    $location.path('/login');
+                }
+                else{
+                    $location.path('/');
+                    console.log('Error: ' + error);
+                }
+            });
     $scope.withdraw = function(){
         $scope.invalidInvoice = false;
         $scope.paymentFailed = false;

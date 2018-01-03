@@ -7,7 +7,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var httpsRedirect = require('express-https-redirect');
+var httpsRedirect = require('express-https-redirect')
+var cron = require('node-cron');
 
 var podcasts = require('./routes/podcasts');
 var lightning = require('./routes/lightning');
@@ -17,6 +18,7 @@ var sessionCtrl = require('./controllers/session');
 
 var LocalStrategy = require('passport-local').Strategy;
 
+cron.schedule('* * * * *', db.refreshAll);
 var app = express();
 
 // Enable express sessions
@@ -40,8 +42,7 @@ app.use('/node_modules/qrcode-generator', express.static(__dirname + '/node_modu
 app.use('/node_modules/angular-qrcode', express.static(__dirname + '/node_modules/angular-qrcode'));
 app.use('/node_modules/ngclipboard', express.static(__dirname + '/node_modules/ngclipboard'));
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

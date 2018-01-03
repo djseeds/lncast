@@ -4,21 +4,21 @@
     <h1>My Account</h1>
 </div>
 <div class="card">
-    <div class="card-block">
+    <div class="card-block m-2">
         <h4 class="card-title">Balance</h4>
-        <p class="card-text">{{account.balance}} Satoshis</p>
-        <a class="btn btn-primary" ng-hide="withdrawClicked == true" ng-click="withdrawClicked = true">Withdraw</a>
-        <form name="withdrawform" ng-submit="withdraw()" ng-show="withdrawClicked == true">
-            <div class="form-group">
-                <label for="invoice">Lightning Invoice</label>
-                <input type="text" title="Please enter a valid testnet lightning invoice." pattern="lightning:lntb.*" class="form-control" id="invoice" ng-model="invoice" required="required" placeholder="lightning:lntb...">
-                <div class="alert alert-danger" ng-show="invalidInvoice == true" ng-init="invalidInvoice = false">
-                    <strong>Invalid invoice!</strong> Please check your invoice and try again.
+        <p class="card-text">µt₿{{account.balance / 100}}</p>
+            <a class="btn btn-primary" ng-hide="withdrawClicked == true" ng-click="withdrawClicked = true">Withdraw</a>
+            <form name="withdrawform" ng-submit="withdraw()" ng-show="withdrawClicked == true">
+                <div class="form-group">
+                    <label for="invoice">Lightning Invoice</label>
+                    <input type="text" title="Please enter a valid testnet lightning invoice." pattern="lightning:lntb.*" class="form-control" id="invoice" ng-model="invoice" required="required" placeholder="lightning:lntb...">
+                    <div class="alert alert-danger" ng-show="invalidInvoice == true" ng-init="invalidInvoice = false">
+                        <strong>Invalid invoice!</strong> Please check your invoice and try again.
+                    </div>
+                    <div class="alert alert-danger" ng-show="paymentFailed == true" ng-init="paymentFailed = false">
+                        <strong>Payment failed!</strong> Please try again later.
+                    </div>
                 </div>
-                <div class="alert alert-danger" ng-show="paymentFailed == true" ng-init="paymentFailed = false">
-                    <strong>Payment failed!</strong> Please try again later.
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
 </div>

@@ -38,7 +38,6 @@ module.exports = {
                 return;
             }
             invoice = new db.Invoice(response);
-            console.log(invoice);
             invoice.save();
             callback(null, invoice);
         });
@@ -47,7 +46,6 @@ module.exports = {
     sendPayment: function(pay_req, callback) {
         lightning.sendPaymentSync({ payment_request: pay_req, }, function(err, response){
             if(response.payment_error){
-                console.log("Error");
                 err = new Error(response.payment_error);
                 console.log(err);
             }
@@ -57,7 +55,6 @@ module.exports = {
 
     decodePayReq: function(pay_req, callback) {
         lightning.decodePayReq({ pay_req: pay_req, }, function(err, response){
-            console.log("DecodePayReq:" + response);
             callback(err, response);
         });
     },

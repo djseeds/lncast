@@ -1,4 +1,5 @@
 var parsePodcast = require('node-podcast-parser');
+var FeedParser = require('feedparser');
 var request = require('request');
 var mongoose = require('mongoose');
 var passportLocalMongoose = require('passport-local-mongoose');
@@ -16,21 +17,26 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 
-var EpisodeSchema = new Schema(
-        {
-            guid: {type: String, required: true, unique: true},
-            title: {type: String, required: true},
-            description: {type: String},
-            image: {type: String},
-            published: {type: Date},
-            duration: {type: Number},
-            enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
-        },
-        {
-            toJSON: {virtuals: true},
-        }
-
-        );
+var EpisodeSchema = new Schema({
+    title: {type: String, required: true},
+    description: {type: String},
+    summary: {type: String},
+    link: {type: String},
+    origlink: {type: String},
+    permalink: {type: String},
+    date: {type: Date},
+    pubdate: {type: Date},
+    author: {type: String},
+    guid: {type: String, required: true, unique: true},
+    comments: {type: String},
+    image: {url: {type: String}, title: {type: String}},
+    categories: [{type: String}],
+    source: {url: {type: String}, title: {type: String}},
+    enclosures: [{type: Schema.ObjectId, ref: 'Enclosure'}],
+},
+{
+    toJSON: {virtuals: true},
+});
 
 var Episode = mongoose.model('Episode', EpisodeSchema, 'Episode');
 
@@ -52,19 +58,25 @@ var InvoiceSchema = new Schema({
 var Invoice = mongoose.model('Invoice', InvoiceSchema, 'Invoice');
 
 var PodcastSchema = new Schema ({
-    feed: {type: String, required: true, unique: true},
     title: {type: String, required: true},
-    description: {short: {type: String}, long: {type: String}},
+    description: {type: String},
     link: {type: String},
-    image: {type: String},
-    updated: {type: Date},
+    xmlurl: {type: String, required: true, unique: true},
+    date: {type: Date},
+    pubdate: {type: Date},
+    author: {type: String},
+    language: {type: String},
+    image: {url: {type: String}, title: {type: String}},
+    favicon: {type: String},
+    copyright: {type: String},
+    generator: {type: String},
+    categories: [{type: String}],
     episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
     price: {type: Number},
 },
 {
-    toJSON : { virtuals: true },
-}
-);
+toJSON : { virtuals: true },
+});
 
 PodcastSchema.virtual('url').get(function(){
     return '/podcast/' + this._id;
@@ -174,73 +186,80 @@ module.exports.refreshAll = function(){
     });
 }
 
-addEpisode = function(article){
-    if(!article.enclosure){
-        // No audio
-        return null;
-    }
-    episode = new Episode(article);
-    episode.enclosure = new Enclosure(article.enclosure);
-    episode.enclosure.save();
-    episode.save(function (err) {
-        if(err) {
-            console.log(err);
-            return null;
+parseFeed = function(feed, callback){
+    var podcast;
+    var feedparser = new FeedParser();
+
+    feedparser.on('error', function(err){
+        this.destroy(err);
+    });
+
+    feedparser.on('meta', function(meta) {
+        podcast = new Podcast(this.meta);
+    });
+
+    feedparser.on('readable', function() {
+        var stream = this;
+        while (item = stream.read()) {
+            var episode = new Episode(item);
+            item.enclosures.forEach(function(enclosure){
+                enclosure = new Enclosure(enclosure);
+                episode.enclosures.push(enclosure);
+            });
+            podcast.episodes.push(episode);
         }
     });
-    return episode;
-}
 
-parseFeed = function(feed, callback){
-    request(feed, function(err, res, data) {
-        if (err) {
+    feedparser.on('close', function(err){
+        if(err){
             console.log(err);
             callback(err, null);
             return;
         }
-        parsePodcast(data, function(err, data) {
-            if (err) {
-                console.log(err);
-                callback(err, null);
-                return;
-            }
-            callback(null, data);
-        });
+        callback(null, podcast);
+        return;
+    });
+    feedparser.on('end', function(err){
+        this.destroy();
+    });
 
-    })
+    request
+        .get(feed)
+        .on('error', function(err){
+            console.log(err);
+            callback(err, null);
+            return;
+        })
+        .pipe(feedparser);
 }
 
 module.exports.addPodcast = function(feed, price, callback){
-    parseFeed(feed, function(err, data) {
+    parseFeed(feed, function(err, podcast) {
         if(err) {
             console.log(err);
             callback(err, null);
             return;
         }
-        var podcast = new Podcast( {
-            feed: feed,
-            title: data.title,
-            description: data.description,
-            link: data.link,
-            image: data.image,
-            updated: data.updated,
-            price: price,
-        });
-        data.episodes.forEach( function(article){
-            episode = addEpisode(article);
-            if(episode){
-                podcast.episodes.push(episode);
-            }
+        podcast.price = price;
+        podcast.episodes.forEach( function(episode){
+            episode.enclosures.forEach(function(enclosure){
+                enclosure.save(function(err){
+                    if(err) console.log(err);
+                });
+            });
+            episode.save(function (err) {
+                if(err) console.log(err);
+            });
         });
         podcast.save(function (err) {
             if(err) {
                 console.log(err);
-                callback(err, null);
+                    callback(err, null);
                 return;
             }
             callback(null, podcast);
         });
-    })
+    });
 }
 
 var payOwnerOfPodcast = function(podcastID, value){
@@ -265,7 +284,7 @@ var payOwnerOfEpisode = function(episodeID, value){
 }
 
 module.exports.payOwnerOfEnclosure = function(enclosureID, value){
-    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
+    Episode.findOne({"enclosures":enclosureID}, function(err, episode){
         if(err){
             console.log(err);
             return;
@@ -285,7 +304,7 @@ var getEpisodePrice = function(episodeID, callback){
 }
 
 module.exports.getEnclosurePrice = function(enclosureID, callback){
-    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
+    Episode.findOne({"enclosures":enclosureID}, function(err, episode){
         if(err){
             console.log(err);
             callback(err, null)

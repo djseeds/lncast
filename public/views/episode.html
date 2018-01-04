@@ -4,7 +4,7 @@
     <a href="#!{{podcast.url}}">
         <div class="row">
             <div class="col-2">
-                <img src="{{episode.image || podcast.image}}" class="img-fluid" />
+                <img src="{{podcast.image.url}}" class="img-fluid" />
             </div>
             <div class="column">
                 <h1>{{podcast.title}}<h1>
@@ -17,7 +17,7 @@
     <h2>{{episode.title}}</h2>
     <p class="mb-2" ng-bind-html="episode.description"></p>
     <div ng-if="episode.unlocked" ng-cloak>
-        <audio controls autoplay><source src="{{episode.enclosure.url}}"></audio>
+        <audio controls autoplay><source src="{{episode.enclosures[0].url}}"></audio>
     </div>
     <div ng-if="!episode.unlocked && !pay_req_generated" ng-cloak>
         <button ng-click="getPayReq()" type="button" class="btn btn-primary">Buy Episode: t${{podcast.price}}</button>

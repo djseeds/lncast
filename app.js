@@ -18,7 +18,7 @@ var sessionCtrl = require('./controllers/session');
 
 var LocalStrategy = require('passport-local').Strategy;
 
-cron.schedule('* * * * *', db.refreshAll);
+//cron.schedule('* * * * *', db.refreshAll);
 var app = express();
 
 // Enable express sessions

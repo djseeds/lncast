@@ -17,7 +17,7 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
         });
 
     $scope.getPayReq = function() {
-        $http.get('/api/lightning/buy/' + $scope.episode.enclosure).then(
+        $http.get('/api/lightning/buy/' + $scope.episode.enclosures[0]).then(
             function(response){
                 console.log(response.data);
                 $scope.pay_req = response.data.invoice.payment_request;
@@ -32,14 +32,14 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
     }
 
     var pollEpisodeLink = function(firstTry) {
-        if(!$scope.episode.enclosure){
+        if(!$scope.episode.enclosures){
             return;
         }
         if(firstTry | $scope.pay_req_generated){
-            $http.get('/api/enclosure/' + $scope.episode.enclosure).then(
+            $http.get('/api/enclosure/' + $scope.episode.enclosures[0]).then(
                     function(response){
                         console.log(response.data);
-                        $scope.episode.enclosure = response.data;
+                        $scope.episode.enclosures[0] = response.data;
                         $scope.episode.unlocked = true;
                     },
                     function(error){

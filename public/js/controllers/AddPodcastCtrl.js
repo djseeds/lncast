@@ -1,4 +1,5 @@
 angular.module('myApp').controller('AddPodcastCtrl', ['$rootScope', '$scope', '$http', '$location', function addPodcastController($rootScope, $scope, $http, $location) {
+    $scope.price = 0.01;
     if(!$rootScope.activeUser){
         $location.path('/login');
     }
@@ -6,7 +7,7 @@ angular.module('myApp').controller('AddPodcastCtrl', ['$rootScope', '$scope', '$
         $scope.addFailed = false;
         $http.post('/api/add', {
             feed: $scope.feed,
-            price: 0.01,
+            price: $scope.price,
         }).then(
             function(response){
                 $location.path(response.data.url);

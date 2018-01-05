@@ -1,4 +1,4 @@
-# LNCast - Bitcoin Lightning Network Podcatcher
+# LNCast - Lightning Network Podcatcher
 
 [LNCast](https://lncast.com) leverages the Bitcoin Lightning Network to enable creators to monetize their podcasts with micropayments.
 

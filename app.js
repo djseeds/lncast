@@ -18,7 +18,9 @@ var sessionCtrl = require('./controllers/session');
 
 var LocalStrategy = require('passport-local').Strategy;
 
-//cron.schedule('* * * * *', db.refreshAll);
+// Refresh all podcasts every hour
+cron.schedule('0 * * * *', db.refreshAll);
+
 var app = express();
 
 // Enable express sessions

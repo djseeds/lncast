@@ -32,7 +32,7 @@ var EpisodeSchema = new Schema({
     image: {url: {type: String}, title: {type: String}},
     categories: [{type: String}],
     source: {url: {type: String}, title: {type: String}},
-    enclosures: [{type: Schema.ObjectId, ref: 'Enclosure'}],
+    enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
 },
 {
     toJSON: {virtuals: true},
@@ -121,57 +121,90 @@ var refreshEpisode = function(episodeGUID){
 
 }
 
-var refreshPodcast = function(podcastID){
-    Podcast.findById(podcastID)
-        .populate("episodes")
-        .exec(function(err, podcast){
-            if(err){
-                console.log(err);
-                return;
-            }
-            parseFeed(podcast.feed, function(err, data) {
-                if(err) {
-                    console.log(err);
-                    return;
-                }
-                if(data.updated > podcast.updated){
-                    // Avoid overwriting episodes
-                    var episodes = data.episodes;
-                    delete data.episodes;
-
-                    // Update podcast data
-                    for(var key in data) podcast[key] = data[key];
-
-                    // Remove episodes that are no longer present in RSS feed
-                    podcast.episodes = podcast.episodes.filter(function(oldEpisode){
-                        return episodes.findIndex(function(newEpisode){
-                            return newEpisode.guid == oldEpisode.guid;
-                        }) != -1;
-                    })
-
-
-                    // New episodes are present in RSS episodes and not 
-                    // present in podcast data.
-                    var newEpisodes = episodes.filter(function(newEpisode){
-                        return podcast.episodes.findIndex(function(oldEpisode){
-                            return newEpisode.guid == oldEpisode.guid;
-                        }) == -1;
-
-                    });
-
-                    // Add new episodes
-                    newEpisodes.forEach(function(article){
-                        episode = addEpisode(article);
-                        if(episode) {
-                            podcast.episodes.push(episode);
-                        }
-                    });
+var updateEpisode = function(data){
+    Episode.findOne({'guid': data.guid})
+        .populate('enclosure')
+        .exec(function(episode){
+        if(!episode){
+            // Add a new episode
+            Podcast.findOne({'xmlurl': data.meta.xmlurl}, function(podcast){
+                if(podcast){
+                    episode = new Episode(data);
+                    if(data.enclosures){
+                        var enclosure = data.enclosures[0];
+                        episode.enclosure = new Enclosure(enclosure);
+                        episode.enclosure.save();
+                    }
+                    episode.save();
+                    podcast.episodes.push(episode);
                     podcast.save();
-
                 }
             });
+        }
+        else if(data.date > episode.date){
+            if(data.enclosures){
+                var enclosure = data.enclosures[0];
+                if(episode.enclosure.url != enclosure.url){
+                    episode.enclosure = new Enclosure(enclosure);
+                    episode.enclosure.save();
+                }
+            }
+            Object.assign(episode, data);
+            episode.save();
+        }
+    })
 
-        });
+}
+
+var updatePodcast = function(data){
+    Podcast.findOne({'xmlurl': data.xmlurl}, function(podcast){
+        if(!podcast){
+            return;
+        }
+        if(data.date > podcast.date){
+            Object.assign(podcast, data);
+            podcast.save();
+        }
+    });
+}
+
+var refreshFeed = function(feed){
+    var feedparser = new FeedParser();
+
+    feedparser.on('error', function(err){
+        this.destroy(err);
+    });
+
+    feedparser.on('meta', function(meta) {
+        updatePodcast(meta);
+    });
+
+    feedparser.on('readable', function() {
+        var stream = this;
+        while (item = stream.read()) {
+            updateEpisode(item);
+        }
+    });
+
+    feedparser.on('close', function(err){
+        if(err){
+            console.log(err);
+            return;
+        }
+        return;
+    });
+
+    feedparser.on('end', function(err){
+        this.destroy();
+    });
+
+    request
+        .get(feed)
+        .on('error', function(err){
+            console.log(err);
+            return;
+        })
+    .pipe(feedparser);
 }
 
 module.exports.refreshAll = function(){
@@ -181,12 +214,13 @@ module.exports.refreshAll = function(){
             return;
         }
         podcasts.forEach(function(podcast){
-            refreshPodcast(podcast._id);
+            refreshFeed(podcast.xmlurl);
         });
     });
 }
 
-parseFeed = function(feed, callback){
+
+var parseFeed = function(feed, callback){
     var podcast;
     var feedparser = new FeedParser();
 
@@ -202,10 +236,10 @@ parseFeed = function(feed, callback){
         var stream = this;
         while (item = stream.read()) {
             var episode = new Episode(item);
-            item.enclosures.forEach(function(enclosure){
-                enclosure = new Enclosure(enclosure);
-                episode.enclosures.push(enclosure);
-            });
+            if(item.enclosures){
+                var enclosure = item.enclosures[0];
+                episode.enclosure = new Enclosure(enclosure);
+            }
             podcast.episodes.push(episode);
         }
     });
@@ -230,7 +264,7 @@ parseFeed = function(feed, callback){
             callback(err, null);
             return;
         })
-        .pipe(feedparser);
+    .pipe(feedparser);
 }
 
 module.exports.addPodcast = function(feed, price, callback){
@@ -242,11 +276,11 @@ module.exports.addPodcast = function(feed, price, callback){
         }
         podcast.price = price;
         podcast.episodes.forEach( function(episode){
-            episode.enclosures.forEach(function(enclosure){
-                enclosure.save(function(err){
+            if(episode.enclosure){
+                episode.enclosure.save(function(err){
                     if(err) console.log(err);
                 });
-            });
+            }
             episode.save(function (err) {
                 if(err) console.log(err);
             });
@@ -284,7 +318,7 @@ var payOwnerOfEpisode = function(episodeID, value){
 }
 
 module.exports.payOwnerOfEnclosure = function(enclosureID, value){
-    Episode.findOne({"enclosures":enclosureID}, function(err, episode){
+    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
         if(err){
             console.log(err);
             return;
@@ -304,7 +338,7 @@ var getEpisodePrice = function(episodeID, callback){
 }
 
 module.exports.getEnclosurePrice = function(enclosureID, callback){
-    Episode.findOne({"enclosures":enclosureID}, function(err, episode){
+    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
         if(err){
             console.log(err);
             callback(err, null)

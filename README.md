@@ -6,6 +6,9 @@
 
 LNCast is a web application built on the [MEAN Stack](http://mean.io/). It uses [node-feedparser](https://github.com/danmactough/node-feedparser) to get podcast info from RSS feeds. LNCast supports micropayments and payouts on the [Bitcoin Testnet](https://en.bitcoin.it/wiki/Testnet) using [LND](https://github.com/lightningnetwork/lnd)'s [GRPC](https://grpc.io/) service.
 
+## Demo
+![Demo Payment GIF](https://media.giphy.com/media/xUNd9KyCXSvKuaPp1m/giphy.gif)
+
 ## Why Pay for Podcasts?
 
 I am a huge fan of the podcast medium. Podcasts are a great way to learn or to be entertained when your brain would otherwise be idle.

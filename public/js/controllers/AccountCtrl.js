@@ -2,6 +2,7 @@ angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', '$location
     $http.get('/api/account').then(
             function(response){
                 $scope.account = response.data;
+
             },
             function(error){
                 if(error.status == 401){
@@ -11,6 +12,15 @@ angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', '$location
                     $location.path('/');
                     console.log('Error: ' + error);
                 }
+            });
+
+    $http.get('https://blockchain.info/ticker').then(
+            function(response){
+                $scope.btcPrice = response.data.USD.last;
+                console.log($scope.btcPrice);
+            },
+            function(error){
+                console.log(error);
             });
     $scope.withdraw = function(){
         $scope.invalidInvoice = false;

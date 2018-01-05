@@ -2,12 +2,12 @@
 
 [LNCast](https://lncast.com) leverages the Bitcoin Lightning Network to enable creators to monetize their podcasts with micropayments.
 
+## Demo
+![Demo Payment GIF](https://media.giphy.com/media/xUNd9KyCXSvKuaPp1m/giphy.gif)
+
 ## How it Works
 
 LNCast is a web application built on the [MEAN Stack](http://mean.io/). It uses [node-feedparser](https://github.com/danmactough/node-feedparser) to get podcast info from RSS feeds. LNCast supports micropayments and payouts on the [Bitcoin Testnet](https://en.bitcoin.it/wiki/Testnet) using [LND](https://github.com/lightningnetwork/lnd)'s [GRPC](https://grpc.io/) service.
-
-## Demo
-![Demo Payment GIF](https://media.giphy.com/media/xUNd9KyCXSvKuaPp1m/giphy.gif)
 
 ## Why Pay for Podcasts?
 

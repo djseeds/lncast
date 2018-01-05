@@ -19,7 +19,7 @@
                     <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">
                         <h2>{{episode.title}}</h2>
                     </a>
-                    <p ng-bind-html="episode.description"></p>
+                    <p ng-bind-html="episode.summary || episode.description"></p>
                 </div>
     </div>
 </div>

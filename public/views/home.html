@@ -10,7 +10,9 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-2">
-                    <img src="{{podcast.image.url}}" class="img-fluid img-thumbnail" />
+                    <a ng-href="#!{{podcast.url}}">
+                        <img src="{{podcast.image.url}}" class="img-fluid img-thumbnail" />
+                    </a>
                 </div>
                 <div class="col">
                     <a ng-href="#!{{podcast.url}}">

@@ -7,7 +7,15 @@ var router = express.Router();
 /* GET user info. */
 router.get('/', function(req, res, next) {
     if(req.isAuthenticated()){
-        res.json(req.user);
+        req.user.populate('owns', function(err, user){
+            if(err){
+                res.json(req.user);
+            }
+            else{
+                res.json(user);
+            }
+        });
+        req.user.depopulate('owns');
     }
     else {
         res.status(401);

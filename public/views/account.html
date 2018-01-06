@@ -3,10 +3,11 @@
 <div class="jumbotron text-center">
     <h1>My Account</h1>
 </div>
-<div class="card">
-    <div class="card-block m-2">
-        <h4 class="card-title">Balance</h4>
-        <p class="card-text">µt₿{{account.balance / 100}} ≈ t${{account.balance * btcPrice / 100000000}}</p>
+<div class="card-deck">
+    <div class="card">
+        <div class="card-block m-2">
+            <h4 class="card-title">Balance</h4>
+            <p class="card-text">µt₿{{account.balance / 100}} ≈ t${{account.balance * btcPrice / 100000000}}</p>
             <a class="btn btn-primary" ng-hide="withdrawClicked == true" ng-click="withdrawClicked = true">Withdraw</a>
             <form name="withdrawform" ng-submit="withdraw()" ng-show="withdrawClicked == true">
                 <div class="form-group">
@@ -21,4 +22,30 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
         </div>
+    </div>
+    <div class="card">
+        <div class="card-block m-2">
+            <h4 class="card-title">My Podcasts</h4>
+            <div class="card" ng-repeat="podcast in account.owns">
+                <div class="card-block m-2">
+                    <h5 class="card-title">
+                        {{podcast.title}}
+                    </h5>
+                    <form>
+                        <div class="form-group">
+                            <label for="price{{$index}}">Price</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">t$</span>
+                                </div>
+                                <input type="number" step="any" minimum="0" name="price" class="form-control" id="price{{$index}}" ng-model="podcast.price" required="true">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" ng-click="update(podcast)">Update</button>
+                    </form>
+                    <button class="btn btn-danger" ng-click="delete(podcast)"">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

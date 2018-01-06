@@ -32,6 +32,48 @@ router.get('/podcast/:podcastID', function (req, res, next){
     })
 });
 
+/* POST (update) podcast */
+router.post('/podcast/:podcastID', function (req, res, next){
+    if(req.isAuthenticated() && req.user.owns.findIndex(function(id){
+        console.log("findIndex");
+        return id.toString() == req.params.podcastID;
+    }) != -1) {
+        database.Podcast.findById(req.params.podcastID, function(err, podcast){
+            if(err){
+                return next(err);
+            }
+            if(!podcast){
+                res.status(404);
+                res.send("Not Found");
+                return;
+            }
+            if(req.body && req.body.price){
+                podcast.price = req.body.price;
+            }
+            podcast.save();
+            res.send("OK");
+        })
+    }
+    else {
+        res.status(401);
+        res.send("Access denied");
+    }
+});
+
+/* DELETE podcast */
+router.delete('/podcast/:podcastID', function (req, res, next){
+    if(req.isAuthenticated() && req.user.owns.findIndex(function(id){
+        return id.toString() == req.params.podcastID;
+    }) != -1) {
+        database.removePodcast(req.params.podcastID);
+        res.send("OK");
+    }
+    else {
+        res.status(401);
+        res.send("Access denied");
+    }
+})
+
 // GET single podcast episode page
 router.get('/podcast/:podcastID/:episodeID', function (req, res, next) {
     database.Podcast.findById(req.params.podcastID)

@@ -11,7 +11,6 @@ angular.module('myApp').controller('RegisterCtrl', ['$rootScope', '$scope', '$ht
             },
             function(error){
                 $scope.registerFailed = true;
-                console.log('Error: ' + error.data);
             });
     }
 }

@@ -267,6 +267,40 @@ var parseFeed = function(feed, callback){
     .pipe(feedparser);
 }
 
+removeEpisode = function(episodeID){
+    Episode.findById(episodeID, function(error, episode){
+        if(episode){
+            Enclosure.remove({"_id": episode.enclosure}, function(err){
+                if(err){
+                    console.log("Error removing enclosure");
+                }
+            });
+            Episode.remove({"_id": episode._id}, function(err){
+                if(err){
+                    console.log("Error removing episode");
+                }
+            });
+            return;
+        }
+    });
+}
+
+module.exports.removePodcast = function(podcastID){
+    Podcast.findById(podcastID, function(error, podcast){
+        if(podcast){
+            podcast.episodes.forEach(function(episode){
+                removeEpisode(episode);
+            })
+            Podcast.remove({"_id": podcast._id}, function(err){
+                if(err){
+                    console.log("Error removing podcast");
+                }
+            });
+            return;
+        }
+    });
+}
+
 module.exports.addPodcast = function(feed, price, callback){
     parseFeed(feed, function(err, podcast) {
         if(err) {

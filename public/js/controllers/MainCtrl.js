@@ -4,7 +4,6 @@ angular.module('myApp').controller('MainCtrl', ['$scope', '$http', '$routeParams
             $scope.podcasts = response.data;
         },
         function(error){
-            console.log('Error: ' + error);
         })
     }
 ]);

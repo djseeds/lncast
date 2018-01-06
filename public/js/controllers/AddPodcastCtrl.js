@@ -19,7 +19,6 @@ angular.module('myApp').controller('AddPodcastCtrl', ['$rootScope', '$scope', '$
                 else{
                     $scope.addFailed = true;
                 }
-                console.log('Error: ' + error.data);
             });
     }
 }

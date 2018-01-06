@@ -5,15 +5,11 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
     $http.get('/api/podcast/' + $routeParams.podcastID + '/' + $routeParams.episodeID).then(
         function(response){
             $scope.episode = response.data.episode;
-            console.log($scope.episode);
-            console.log($scope.episode);
             $scope.podcast = response.data.podcast;
-            console.log($scope.podcast);
             $scope.episode.unlocked = false;
             pollEpisodeLink(true);
         },
         function(error){
-            console.log('Error: ' + error.data);
         });
 
     $scope.getPayReq = function() {
@@ -27,7 +23,6 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
                 $scope.price = response.data.price;
             },
             function(error){
-                console.log('Error: ' + error.data);
             });
     }
 
@@ -38,7 +33,6 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
         if(firstTry | $scope.pay_req_generated){
             $http.get('/api/enclosure/' + $scope.episode.enclosure).then(
                     function(response){
-                        console.log(response.data);
                         $scope.episode.enclosure = response.data;
                         $scope.episode.unlocked = true;
                     },
@@ -48,7 +42,6 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
                             $timeout(pollEpisodeLink, 1000, true, false);
                         }
                         else {
-                            console.log('Error: ' + error.data);
                         }
                     });
         }

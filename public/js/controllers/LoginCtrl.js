@@ -1,7 +1,6 @@
 angular.module('myApp').controller('LoginCtrl', ['$rootScope', '$scope', '$http', '$location', function loginController($rootScope, $scope, $http, $location) {
     $scope.loginFailed = false;
     $scope.submit = function(){
-        console.log("sumbit");
         $http.post('/login', {
             username: $scope.username,
             password: $scope.password,
@@ -12,7 +11,6 @@ angular.module('myApp').controller('LoginCtrl', ['$rootScope', '$scope', '$http'
             },
             function(error){
                 $scope.loginFailed = true;
-                console.log('Error: ' + error.data);
             });
     }
 }

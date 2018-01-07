@@ -7,7 +7,7 @@
     <div class="card">
         <div class="card-block m-2">
             <h4 class="card-title">Balance</h4>
-            <p class="card-text">µt₿{{account.balance / 100}} ≈ t${{account.balance * btcPrice / 100000000}}</p>
+            <p class="card-text">{{account.balance / 100}} bits ≈ t${{account.balance * btcPrice / 100000000}}</p>
             <a class="btn btn-primary" ng-hide="withdrawClicked == true" ng-click="withdrawClicked = true">Withdraw</a>
             <form name="withdrawform" ng-submit="withdraw()" ng-show="withdrawClicked == true">
                 <div class="form-group">

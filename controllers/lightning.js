@@ -31,9 +31,10 @@ invoice_sub.on('data', function(invoice) {
 });
 
 module.exports = {
-    addInvoice: function(value, callback) {
-        lightning.addInvoice({ value: value }, function(err, response) {
+    addInvoice: function(value, memo, callback) {
+        lightning.addInvoice({ value: value, memo: memo}, function(err, response) {
             if(err){
+                console.log(err);
                 callback(err, null);
                 return;
             }

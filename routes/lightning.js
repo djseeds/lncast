@@ -35,59 +35,68 @@ router.get('/buy/:enclosureID', function (req, res, next) {
             res.json(response_data);
         }
         else {
-            // Get price of episode
-            db.getEnclosurePrice(enclosure._id, function(err, priceUSD){
-                if(err){
+            // Get parent episode
+            db.Episode.findOne({"enclosure": enclosure._id}, function(err, episode){
+                if(err || !episode){
                     //500 Error
                     var err = new Error('Server Error.');
                     err.status = 500;
                     return next(err);
                 }
-                //Convert price to satoshis
-                request({
-                    url:'https://blockchain.info/tobtc' ,
-                    qs:{
-                        currency: 'USD',
-                        value: priceUSD,
-                    }}, function(err, response, body){
-                        if(err){
-                            //500 Error
-                            var err = new Error('Server Error.');
-                            err.status = 500;
-                            return next(err);
-                        }
-                        var priceSat = Number(body) * 100000000;
-                        // Create invoice
-                        lightning.addInvoice(priceSat, function(err, invoice){
+                db.getEnclosurePrice(enclosure._id, function(err, priceUSD){
+                    if(err){
+                        //500 Error
+                        var err = new Error('Server Error.');
+                        err.status = 500;
+                        return next(err);
+                    }
+
+                    //Convert price to satoshis
+                    request({
+                        url:'https://blockchain.info/tobtc' ,
+                        qs:{
+                            currency: 'USD',
+                            value: priceUSD,
+                        }}, function(err, response, body){
                             if(err){
+                                //500 Error
+                                var err = new Error('Server Error.');
+                                err.status = 500;
                                 return next(err);
                             }
-                            // Add to pending invoices
-                            sessionCtrl.addPendingInvoice(req, invoice, req.params.enclosureID);
-                            //
-                            // Return invoice info
-                            response_data.invoice = invoice;
-                            response_data.price = {
-                                satoshis: priceSat,
-                                usd: priceUSD,
-                            };
-                            res.json(response_data);
-                            lightning.emitter.on(invoice.payment_request, function(invoice){
-                                if(invoice.settled){
-                                    sessionCtrl.removePendingInvoice(req, invoice);
-                                    sessionCtrl.addPurchased(req, req.params.enclosureID);
-                                    db.payOwnerOfEnclosure(req.params.enclosureID, invoice.value);
+                            var priceSat = Number(body) * 100000000;
+                            // Create invoice
+                            lightning.addInvoice(priceSat, episode.title, function(err, invoice){
+                                if(err){
+                                    return next(err);
                                 }
-                            });
+                                // Add to pending invoices
+                                sessionCtrl.addPendingInvoice(req, invoice, req.params.enclosureID);
+                                //
+                                // Return invoice info
+                                response_data.invoice = invoice;
+                                response_data.price = {
+                                    satoshis: priceSat,
+                                    usd: priceUSD,
+                                };
+                                res.json(response_data);
+                                lightning.emitter.on(invoice.payment_request, function(invoice){
+                                    if(invoice.settled){
+                                        sessionCtrl.removePendingInvoice(req, invoice);
+                                        sessionCtrl.addPurchased(req, req.params.enclosureID);
+                                        db.payOwnerOfEnclosure(req.params.enclosureID, invoice.value);
+                                    }
+                                });
+
+                            })
+
 
                         })
+                });
 
-
-                    })
             });
-
         }
-    })
+    });
 });
 
 

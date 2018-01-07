@@ -1,14 +1,14 @@
 var express = require('express');
 var crypto = require('crypto');
 var lightning = require('../controllers/lightning');
-var database = require('../controllers/database');
+var db = require('../controllers/database');
 var sessionCtrl = require('../controllers/session');
 
 var router = express.Router();
 
 /* GET all podcasts. */
 router.get('/podcasts', function(req, res, next) {
-    database.Podcast.find({}, function(err, podcasts) {
+    db.Podcast.find({}, function(err, podcasts) {
         if(err) {
             return next(err);
         }
@@ -20,7 +20,7 @@ router.get('/podcasts', function(req, res, next) {
 
 /* GET podcast */
 router.get('/podcast/:podcastID', function (req, res, next){
-    database.Podcast.findById(req.params.podcastID)
+    db.Podcast.findById(req.params.podcastID)
         .populate('episodes')
         .exec(function(err, podcast) {
         if(err) {
@@ -38,7 +38,7 @@ router.post('/podcast/:podcastID', function (req, res, next){
         console.log("findIndex");
         return id.toString() == req.params.podcastID;
     }) != -1) {
-        database.Podcast.findById(req.params.podcastID, function(err, podcast){
+        db.Podcast.findById(req.params.podcastID, function(err, podcast){
             if(err){
                 return next(err);
             }
@@ -65,7 +65,7 @@ router.delete('/podcast/:podcastID', function (req, res, next){
     if(req.isAuthenticated() && req.user.owns.findIndex(function(id){
         return id.toString() == req.params.podcastID;
     }) != -1) {
-        database.removePodcast(req.params.podcastID);
+        db.removePodcast(req.params.podcastID);
         res.send("OK");
     }
     else {
@@ -76,13 +76,13 @@ router.delete('/podcast/:podcastID', function (req, res, next){
 
 // GET single podcast episode page
 router.get('/podcast/:podcastID/:episodeID', function (req, res, next) {
-    database.Podcast.findById(req.params.podcastID)
+    db.Podcast.findById(req.params.podcastID)
         .exec(function(err, podcast) {
         if(err) {
             next(err);
         }
         else {
-            database.Episode.findById(req.params.episodeID)
+            db.Episode.findById(req.params.episodeID)
                 .exec(function(err, episode) {
                     if(err) {
                         next(err);
@@ -98,22 +98,11 @@ router.get('/podcast/:podcastID/:episodeID', function (req, res, next) {
     })
 });
 
-var episodeIsFree = function(episodeID){
-    // User has paid for episode
-    database.Episode.findById(req.params.episodeID)
-        .exec(function(err, episode) {
-            if(err) {
-                return false;
-            }
-            return episode.price == 0;
-        })
-}
-
 
 // GET podcast link
 router.get('/enclosure/:enclosureID', function (req, res, next) {
-    // Check if enclosure exists in database
-    database.Enclosure.findById(req.params.enclosureID)
+    // Check if enclosure exists in db
+    db.Enclosure.findById(req.params.enclosureID)
         .exec(function(err, enclosure) {
             if(err) {
                 var err = new Error('Not found.');
@@ -123,16 +112,28 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
             else {
                 // If user has paid for episode content
                 purchased = (sessionCtrl.purchased(req, req.params.enclosureID));
-                if (purchased){
+                if (purchased) {
                     // User has paid for episode content
                     res.json(enclosure);
                 }
                 else {
                     // User has not paid for episode content
-                    // 402
-                    var err = new Error('Payment Required');
-                    err.status = 402;
-                    return next(err);
+                    // Check if it is free.
+                    db.getEnclosurePrice(enclosure._id, function(err, price){
+                        if(err) {
+                            return next(err);
+                        }
+                        // Episode is free
+                        else if(price == 0){
+                            res.json(enclosure);
+                        }
+                        else {
+                            // 402
+                            var err = new Error('Payment Required');
+                            err.status = 402;
+                            return next(err);
+                        }
+                    })
                 }
             }
         })
@@ -142,7 +143,7 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
 /* GET all podcasts. */
 router.post('/add', function(req, res, next) {
     if(req.isAuthenticated()) {
-        database.addPodcast(req.body.feed, req.body.price, function(err, podcast){
+        db.addPodcast(req.body.feed, req.body.price, function(err, podcast){
             if(err){
                 console.log(err);
                 return next(err);

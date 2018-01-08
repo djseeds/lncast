@@ -111,23 +111,14 @@ module.exports = {
     User: User,
 }
 
-var refreshEpisode = function(episodeGUID){
-    Episode.findOne({"guid": episodeGUID}, function(err, episode){
-        if(err){
-            console.log(err);
-            return;
-        }
-    });
-
-}
-
 var updateEpisode = function(data){
     Episode.findOne({'guid': data.guid})
         .populate('enclosure')
-        .exec(function(episode){
+        .exec(function(err, episode){
         if(!episode){
+            console.log(data);
             // Add a new episode
-            Podcast.findOne({'xmlurl': data.meta.xmlurl}, function(podcast){
+            Podcast.findOne({'xmlurl': data.meta.xmlurl}, function(err, podcast){
                 if(podcast){
                     episode = new Episode(data);
                     if(data.enclosures){
@@ -208,6 +199,7 @@ var refreshFeed = function(feed){
 }
 
 module.exports.refreshAll = function(){
+    console.log("Refreshing all feeds");
     Podcast.find({}, function(err, podcasts){
         if(err){
             console.log(err);
@@ -216,6 +208,7 @@ module.exports.refreshAll = function(){
         podcasts.forEach(function(podcast){
             refreshFeed(podcast.xmlurl);
         });
+        console.log("Done refreshing feeds");
     });
 }
 

@@ -13,7 +13,7 @@
 
 <!-- Episode List -->
 <div id="episode-list">
-    <div ng-repeat="episode in podcast.episodes">
+    <div ng-repeat="episode in podcast.episodes | orderBy: '-date'">
         <div class="row">
                 <div class="col">
                     <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">

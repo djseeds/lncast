@@ -1,13 +1,9 @@
 <!doctype html>
 
-<div class="jumbotron text-center">
-    <h1>Podcasts<h1>
-</div>
-
 <!-- Podcast List -->
-<div id="podcast-list">
+<div id="podcast-list" class="m-3">
     <div ng-repeat="podcast in podcasts">
-        <div class="container-fluid">
+        <div class="container-fluid mb-1">
             <div class="row">
                 <div class="col-2">
                     <a ng-href="#!{{podcast.url}}">

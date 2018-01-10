@@ -34,9 +34,9 @@
                     <span class="input-group-text">⚡</span>
                 </div>
                 <input id="pay_req" type="text" class="form-control" value="{{pay_req}}"readonly>
-                <button class="btn btn-secondary" ngclipboard data-clipboard-target="#pay_req"><i class="fa fa-copy"></i></button>
-                <a class="btn btn-secondary" href="lightning:{{pay_req}}"><i class="fa fa-external-link"></i></a>
-                <button class="btn btn-secondary" data-target="#req-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
+                <button title="Copy Payment Request" class="btn btn-secondary" ngclipboard data-clipboard-target="#pay_req"><i class="fa fa-copy"></i></button>
+                <a title="Open in Lightning-Enabled Wallet"class="btn btn-secondary" href="lightning:{{pay_req}}"><i class="fa fa-external-link"></i></a>
+                <button title="View Request QR Code" class="btn btn-secondary" data-target="#req-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
             <qrcode size="200" id="req-qrcode" class="collapse m-2" href="lightning:{{pay_req}}" data="lightning:{{pay_req}}"></qrcode></p>
             <div class="input-group m-2">
@@ -44,8 +44,8 @@
                     <span class="input-group-text">Peer:</span>
                 </div>
                 <input type="text" id="peer" class="form-control" value="{{pubkey}}@{{hostname}}" readonly>
-                <button class="btn btn-secondary" ngclipboard data-clipboard-target="#peer"><i class="fa fa-copy"></i></button>
-                <button class="btn btn-secondary" data-target="#peer-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
+                <button title="Copy Peer Address" class="btn btn-secondary" ngclipboard data-clipboard-target="#peer"><i class="fa fa-copy"></i></button>
+                <button title="View Peer QR Code" class="btn btn-secondary" data-target="#peer-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
             <qrcode size="200" id="peer-qrcode" class="collapse m-2" data="{{pubkey}}@{{hostname}}"></qrcode></p>
         </div>

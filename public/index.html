@@ -46,18 +46,23 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#!/add-podcast">Add a Podcast</a>
                 </li>
-                <li class="nav-item", ng-show="activeUser == undefined">
-                    <a class="nav-link" href="#!/login">Login</a>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" data-target="#accountContent" aria-controls="accountContent" aria-expanded="false">Account <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                 </li>
-                <li class="nav-item", ng-hide="activeUser == undefined">
-                    <a class="nav-link" href="#!/logout">Logout</a>
-                </li>
-                <li class="nav-item", ng-show="activeUser == undefined">
-                    <a class="nav-link" href="#!/register">Create an Account</a>
-                </li>
-                <li class="nav-item", ng-hide="activeUser == undefined">
-                    <a class="nav-link" href="#!/account">My Account</a>
-                </li>
+                <div id="accountContent" class="collapse">
+                    <li class="nav-item", ng-show="activeUser == undefined">
+                        <a class="nav-link" href="#!/login">Login</a>
+                    </li>
+                    <li class="nav-item", ng-show="activeUser == undefined">
+                        <a class="nav-link" href="#!/register">Create an Account</a>
+                    </li>
+                    <li class="nav-item", ng-hide="activeUser == undefined">
+                        <a class="nav-link" href="#!/account">My Account</a>
+                    </li>
+                    <li class="nav-item", ng-hide="activeUser == undefined">
+                        <a class="nav-link" href="#!/logout">Logout</a>
+                    </li>
+                </div>
                 <li class="nav-item">
                     <a class="nav-link" href="#!/about">About</a>
                 </li>

@@ -8,6 +8,12 @@ app.config(function ($routeProvider) {
             templateUrl: 'views/home.html',
             controller: 'MainCtrl'
         })
+        .when('/about', {
+            templateUrl: 'views/about.html'
+        })
+        .when('/contact', {
+            templateUrl: 'views/contact.html'
+        })
         .when('/login', {
             templateUrl: 'views/login.html',
             controller: 'LoginCtrl'

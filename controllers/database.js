@@ -36,7 +36,28 @@ var EpisodeSchema = new Schema({
 },
 {
     toJSON: {virtuals: true},
+    toObject: {virtuals: true},
 });
+
+EpisodeSchema.methods.getPrice = function(callback){
+    Podcast.findOne({"episodes": this._id}, function(err, podcast){
+        if(err){
+            console.log(err);
+            callback(err,null);
+        }
+        callback(null, podcast.price);
+    });
+}
+
+EpisodeSchema.methods.payOwner = function(value){
+    Podcast.findOne({"episodes": this._id}, function(err, podcast){
+        if(err){
+            console.log(err);
+            return;
+        }
+        podcast.payOwner(value);
+    })
+}
 
 var Episode = mongoose.model('Episode', EpisodeSchema, 'Episode');
 
@@ -45,7 +66,31 @@ var EnclosureSchema = new Schema({
     filesize: {type: Number},
     type: {type: String},
     url: {type: String},
+},
+{
+    toJSON: {virtuals: true},
+    toObject: {virtuals: true},
 });
+
+EnclosureSchema.methods.getPrice = function(callback){
+    Episode.findOne({"enclosure": this._id}, function(err, episode){
+        if(err){
+            console.log(err);
+            callback(err,null);
+        }
+        episode.getPrice(callback);
+    });
+}
+
+EnclosureSchema.methods.payOwner = function(value){
+    Episode.findOne({"enclosure": this._id}, function(err, episode){
+        if(err){
+            console.log(err);
+            return;
+        }
+        episode.payOwner(value);
+    })
+}
 
 var Enclosure = mongoose.model('Enclosure', EnclosureSchema, 'Enclosure');
 
@@ -82,6 +127,17 @@ PodcastSchema.virtual('url').get(function(){
     return '/podcast/' + this._id;
 });
 
+PodcastSchema.methods.payOwner = function(value){
+    User.findOne({"owns": this._id}, function(err, owner){
+        if(err){
+            console.log(err);
+            return;
+        }
+        owner.balance += parseInt(value, 10);
+        owner.save();
+    })
+}
+
 var Podcast = mongoose.model('Podcast', PodcastSchema, 'Podcast');
 
 var UserSchema = new Schema ({
@@ -98,6 +154,16 @@ var UserSchema = new Schema ({
     address: String,
     balance: {type: Number, default: 0},
 });
+
+UserSchema.methods.withdraw = function(value, callback){
+    this.balance -= parseInt(value, 10);
+    this.save(function(err){
+        if(err){
+            callback(err,null);
+        }
+        callback(null, user.balance);
+    });
+}
 
 UserSchema.plugin(passportLocalMongoose);
 
@@ -321,70 +387,4 @@ module.exports.addPodcast = function(feed, price, callback){
             callback(null, podcast);
         });
     });
-}
-
-var payOwnerOfPodcast = function(podcastID, value){
-    User.findOne({"owns":podcastID}, function(err, user){
-        if(err){
-            console.log(err);
-            return;
-        }
-        user.balance += parseInt(value, 10);
-        user.save();
-    })
-}
-
-var payOwnerOfEpisode = function(episodeID, value){
-    Podcast.findOne({"episodes":episodeID}, function(err, podcast){
-        if(err){
-            console.log(err);
-            return;
-        }
-        payOwnerOfPodcast(podcast._id, value);
-    })
-}
-
-module.exports.payOwnerOfEnclosure = function(enclosureID, value){
-    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
-        if(err){
-            console.log(err);
-            return;
-        }
-        payOwnerOfEpisode(episode._id, value);
-    })
-}
-
-var getEpisodePrice = function(episodeID, callback){
-    Podcast.findOne({"episodes":episodeID}, function(err, podcast){
-        if(err){
-            console.log(err);
-            callback(err, null)
-        }
-        callback(null, podcast.price);
-    });
-}
-
-module.exports.getEnclosurePrice = function(enclosureID, callback){
-    Episode.findOne({"enclosure":enclosureID}, function(err, episode){
-        if(err){
-            console.log(err);
-            callback(err, null)
-        }
-        getEpisodePrice(episode._id, callback);
-    })
-
-}
-
-module.exports.withdraw = function(userID, value, callback){
-    User.findById(userID, function(err, user){
-        if(err){
-            console.log("Error!")
-                console.log(err);
-            callback(err, null);
-            return;
-        }
-        user.balance -= parseInt(value, 10);
-        user.save();
-        callback(null, user.balance);
-    })
 }

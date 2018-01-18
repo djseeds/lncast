@@ -1,5 +1,4 @@
 var express = require('express');
-var db = require('../controllers/database');
 var lightning = require('../controllers/lightning');
 
 var router = express.Router();
@@ -44,7 +43,7 @@ router.post('/withdraw', function(req, res, next) {
                     return;
                 }
                 // Payment successful
-                db.withdraw(req.user._id, info.num_satoshis, function(err, balance){
+                req.user.withdraw(info.num_satoshis, function(err, balance){
                     if(err){
                         req.user.balance -= info.num_satoshis;
                         req.user.save();

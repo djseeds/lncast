@@ -43,7 +43,7 @@ router.get('/buy/:enclosureID', function (req, res, next) {
                     err.status = 500;
                     return next(err);
                 }
-                db.getEnclosurePrice(enclosure._id, function(err, priceUSD){
+                enclosure.getPrice(function(err, priceUSD){
                     if(err){
                         //500 Error
                         var err = new Error('Server Error.');
@@ -84,7 +84,7 @@ router.get('/buy/:enclosureID', function (req, res, next) {
                                     if(invoice.settled){
                                         sessionCtrl.removePendingInvoice(req, invoice);
                                         sessionCtrl.addPurchased(req, req.params.enclosureID);
-                                        db.payOwnerOfEnclosure(req.params.enclosureID, invoice.value);
+                                        enclosure.payOwner(invoice.value);
                                     }
                                 });
 

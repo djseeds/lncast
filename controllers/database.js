@@ -59,6 +59,19 @@ EpisodeSchema.methods.payOwner = function(value){
     })
 }
 
+EpisodeSchema.pre('remove', function(next){
+    Enclosure.findById(this.enclosure, function(err, enclosure){
+        if(err){
+            callback(err);
+            return;
+        }
+        if(enclosure){
+            enclosure.remove();
+        }
+        next();
+    });
+});
+
 var Episode = mongoose.model('Episode', EpisodeSchema, 'Episode');
 
 // Schema for enclosure (attached media)
@@ -137,6 +150,29 @@ PodcastSchema.methods.payOwner = function(value){
         owner.save();
     })
 }
+
+PodcastSchema.statics.removeById = function(podcastID, callback){
+    Podcast.findById(podcastID, function(err, podcast){
+        if(err){
+            callback(err);
+            return;
+        }
+        podcast.remove();
+    });
+}
+
+PodcastSchema.pre('remove', function(next){
+    Episode.find({_id: {$in: this.episodes}}, function(err, episodes){
+        if(err){
+            next(err);
+            return;
+        }
+        episodes.forEach(function(episode){
+            episode.remove();
+        });
+        next();
+    });
+})
 
 var Podcast = mongoose.model('Podcast', PodcastSchema, 'Podcast');
 
@@ -324,40 +360,6 @@ var parseFeed = function(feed, callback){
             return;
         })
     .pipe(feedparser);
-}
-
-removeEpisode = function(episodeID){
-    Episode.findById(episodeID, function(error, episode){
-        if(episode){
-            Enclosure.remove({"_id": episode.enclosure}, function(err){
-                if(err){
-                    console.log("Error removing enclosure");
-                }
-            });
-            Episode.remove({"_id": episode._id}, function(err){
-                if(err){
-                    console.log("Error removing episode");
-                }
-            });
-            return;
-        }
-    });
-}
-
-module.exports.removePodcast = function(podcastID){
-    Podcast.findById(podcastID, function(error, podcast){
-        if(podcast){
-            podcast.episodes.forEach(function(episode){
-                removeEpisode(episode);
-            })
-            Podcast.remove({"_id": podcast._id}, function(err){
-                if(err){
-                    console.log("Error removing podcast");
-                }
-            });
-            return;
-        }
-    });
 }
 
 module.exports.addPodcast = function(feed, price, callback){

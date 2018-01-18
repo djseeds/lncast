@@ -65,8 +65,14 @@ router.delete('/podcast/:podcastID', function (req, res, next){
     if(req.isAuthenticated() && req.user.owns.findIndex(function(id){
         return id.toString() == req.params.podcastID;
     }) != -1) {
-        db.removePodcast(req.params.podcastID);
-        res.send("OK");
+        console.log("Deleting");
+        db.Podcast.removeById(req.params.podcastID, function(err){
+            if(err){
+                console.log(err);
+                return next(err);
+            }
+            res.send("OK");
+        })
     }
     else {
         res.status(401);

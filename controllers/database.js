@@ -33,6 +33,7 @@ var EpisodeSchema = new Schema({
     categories: [{type: String}],
     source: {url: {type: String}, title: {type: String}},
     enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
+    earned: {type: Number, default: 0},
 },
 {
     toJSON: {virtuals: true},
@@ -49,13 +50,15 @@ EpisodeSchema.methods.getPrice = function(callback){
     });
 }
 
-EpisodeSchema.methods.payOwner = function(value){
+EpisodeSchema.methods.credit = function(value){
+    this.earned += parseInt(value, 10);
+    this.save();
     Podcast.findOne({"episodes": this._id}, function(err, podcast){
         if(err){
             console.log(err);
             return;
         }
-        podcast.payOwner(value);
+        podcast.credit(value);
     })
 }
 
@@ -95,13 +98,13 @@ EnclosureSchema.methods.getPrice = function(callback){
     });
 }
 
-EnclosureSchema.methods.payOwner = function(value){
+EnclosureSchema.methods.credit = function(value){
     Episode.findOne({"enclosure": this._id}, function(err, episode){
         if(err){
             console.log(err);
             return;
         }
-        episode.payOwner(value);
+        episode.credit(value);
     })
 }
 
@@ -131,6 +134,7 @@ var PodcastSchema = new Schema ({
     categories: [{type: String}],
     episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
     price: {type: Number},
+    earned: {type: Number, default: 0},
 },
 {
 toJSON : { virtuals: true },
@@ -140,7 +144,9 @@ PodcastSchema.virtual('url').get(function(){
     return '/podcast/' + this._id;
 });
 
-PodcastSchema.methods.payOwner = function(value){
+PodcastSchema.methods.credit = function(value){
+    this.earned += parseInt(value, 10);
+    this.save();
     User.findOne({"owns": this._id}, function(err, owner){
         if(err){
             console.log(err);

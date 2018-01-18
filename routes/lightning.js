@@ -84,7 +84,7 @@ router.get('/buy/:enclosureID', function (req, res, next) {
                                     if(invoice.settled){
                                         sessionCtrl.removePendingInvoice(req, invoice);
                                         sessionCtrl.addPurchased(req, req.params.enclosureID);
-                                        enclosure.payOwner(invoice.value);
+                                        enclosure.credit(invoice.value);
                                     }
                                 });
 

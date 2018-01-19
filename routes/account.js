@@ -22,6 +22,23 @@ router.get('/', function(req, res, next) {
     }
 });
 
+/* Delete User account. */
+router.delete('/', function(req, res, next) {
+    if(req.isAuthenticated()){
+        req.user.remove(function(err){
+            if(err){
+                return next(err);
+            }
+            res.send("OK");
+        });
+        req.user.depopulate('owns');
+    }
+    else {
+        res.status(401);
+        res.send("Access denied");
+    }
+});
+
 /* GET user info. */
 router.post('/withdraw', function(req, res, next) {
     if(req.isAuthenticated()){

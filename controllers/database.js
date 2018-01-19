@@ -236,6 +236,20 @@ UserSchema.methods.withdraw = function(value, callback){
     });
 }
 
+UserSchema.pre('remove', function(next){
+    // Remove user's podcasts before removing user account.
+    Podcast.find({_id: {$in: this.owns}}, function(err, podcasts){
+        if(err){
+            next(err);
+            return;
+        }
+        podcasts.forEach(function(podcast){
+            podcast.remove();
+        });
+        next();
+    });
+})
+
 UserSchema.plugin(passportLocalMongoose);
 
 var User = mongoose.model('User', UserSchema, 'User');

@@ -38,7 +38,24 @@ angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', '$location
                 })
     };
 
-    $scope.delete = function(podcast){
+    $scope.deleteAccount = function(podcast){
+        if(confirm("Are you sure you want to delete your account?\nAll of your data (including podcasts) will be deleted.")){
+            $http.delete('/api/account').then(
+                    function(response){
+                        $route.reload();
+                    },
+                    function(error){
+                        if(error.status == 400){
+                            // Bad request
+                        }
+                        else if(error.status == 500){
+                            // Delete failed
+                        }
+                    })
+        }
+    };
+
+    $scope.deletePodcast = function(podcast){
         if(confirm("Are you sure you want to delete your podcast?")){
             $http.delete('/api/podcast/' + podcast._id).then(
                     function(response){

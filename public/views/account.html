@@ -6,6 +6,13 @@
 <div class="card-deck">
     <div class="card">
         <div class="card-block m-2">
+            <h4 class="card-title">Account Info</h4>
+            <p class="card-text">Username: {{account.username}}</p>
+            <button class="btn btn-danger" ng-click="deleteAccount()">Delete Account</button>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-block m-2">
             <h4 class="card-title">Balance</h4>
             <p class="card-text">{{account.balance / 100}} bits ≈ t${{account.balance * btcPrice / 100000000}}</p>
             <a class="btn btn-primary" ng-hide="withdrawClicked == true" ng-click="withdrawClicked = true">Withdraw</a>
@@ -43,7 +50,7 @@
                         </div>
                         <button class="btn btn-primary" ng-click="update(podcast)">Update</button>
                     </form>
-                    <button class="btn btn-danger" ng-click="delete(podcast)"">Delete</a>
+                    <button class="btn btn-danger" ng-click="deletePodcast(podcast)">Delete Podcast</button>
                 </div>
             </div>
         </div>

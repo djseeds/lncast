@@ -11,9 +11,27 @@
     </div>
 </div>
 
+<!-- Filter and Sort-->
+<form class="container">
+    <div class="form-row">
+        <div class="column">
+            <div class="form-group">
+                <label for="sortBy">Sort By</label>
+                <select class="custom-select custom-select-sm" id="sortBy" ng-model="sortBy" ng-init="sortBy='-pubdate'">
+                    <option value="-pubdate">Publish Date</option>
+                    <option value="-earned" selected>Highest Grossing</option>
+                    <option value="-listens">Most Listens</option>
+                    <option value="title">Title: A to Z</option>
+                    <option value="-title">Title: Z to A<option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form>
+
 <!-- Episode List -->
 <div id="episode-list" class="m-3">
-    <div ng-repeat="episode in podcast.episodes | orderBy: '-date'">
+    <div ng-repeat="episode in podcast.episodes | orderBy:sortBy"> 
         <div class="row">
                 <div class="col">
                     <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">

@@ -34,6 +34,7 @@ var EpisodeSchema = new Schema({
     source: {url: {type: String}, title: {type: String}},
     enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
     earned: {type: Number, default: 0},
+    listens: {type: Number, default: 0},
 },
 {
     toJSON: {virtuals: true},
@@ -59,6 +60,18 @@ EpisodeSchema.methods.credit = function(value){
             return;
         }
         podcast.credit(value);
+    })
+}
+
+EpisodeSchema.methods.listen = function(){
+    this.listens++;
+    this.save();
+    Podcast.findOne({"episodes": this._id}, function(err, podcast){
+        if(err){
+            console.log(err);
+            return;
+        }
+        podcast.listen();
     })
 }
 
@@ -108,6 +121,16 @@ EnclosureSchema.methods.credit = function(value){
     })
 }
 
+EnclosureSchema.methods.listen = function(){
+    Episode.findOne({"enclosure": this._id}, function(err, episode){
+        if(err){
+            console.log(err);
+            return;
+        }
+        episode.listen();
+    })
+}
+
 var Enclosure = mongoose.model('Enclosure', EnclosureSchema, 'Enclosure');
 
 // Schema for enclosure (attached media)
@@ -135,6 +158,7 @@ var PodcastSchema = new Schema ({
     episodes: [{type: Schema.ObjectId, ref: 'Episode'}],
     price: {type: Number},
     earned: {type: Number, default: 0},
+    listens: {type: Number, default: 0},
 },
 {
 toJSON : { virtuals: true },
@@ -155,6 +179,11 @@ PodcastSchema.methods.credit = function(value){
         owner.balance += parseInt(value, 10);
         owner.save();
     })
+}
+
+PodcastSchema.methods.listen = function(){
+    this.listens++;
+    this.save();
 }
 
 PodcastSchema.statics.removeById = function(podcastID, callback){

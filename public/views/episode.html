@@ -38,7 +38,14 @@
                 <a title="Open in Lightning-Enabled Wallet"class="btn btn-secondary" href="lightning:{{pay_req}}"><i class="fa fa-external-link"></i></a>
                 <button title="View Request QR Code" class="btn btn-secondary" data-target="#req-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
-            <qrcode size="200" id="req-qrcode" class="collapse m-3" href="lightning:{{pay_req}}" data="lightning:{{pay_req}}"></qrcode></p>
+            <div class="collapse" id="req-qrcode">
+                <div class="card bg-light mb-3" style="display: inline-block">
+                    <div class="card-header text-center">Payment Request QR Code</div>
+                    <div class="card-body">
+                        <qrcode size="200"  class="m-3" href="lightning:{{pay_req}}" data="lightning:{{pay_req}}"></qrcode>
+                    </div>
+                </div>
+            </div>
             <div class="input-group m-2">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Peer:</span>
@@ -47,7 +54,14 @@
                 <button title="Copy Peer Address" class="btn btn-secondary" ngclipboard data-clipboard-target="#peer"><i class="fa fa-copy"></i></button>
                 <button title="View Peer QR Code" class="btn btn-secondary" data-target="#peer-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
-            <qrcode size="200" id="peer-qrcode" class="collapse m-3" data="{{pubkey}}@{{hostname}}"></qrcode></p>
+            <div id="peer-qrcode" class="collapse">
+                <div class="card bg-light mb-3" style="display: inline-block">
+                    <div class="card-header text-center">Peer QR Code</div>
+                    <div class="card-body">
+                        <qrcode size="200" class="m-3" data="{{pubkey}}@{{hostname}}"></qrcode>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

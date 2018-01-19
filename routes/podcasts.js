@@ -118,17 +118,25 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
             else {
                 // If user has paid for episode content
                 purchased = (sessionCtrl.purchased(req, req.params.enclosureID));
-                if (purchased || enclosure.price == 0) {
-                    // User has paid for episode content
-                    // or episode is free.
-                    res.json(enclosure);
-                }
-                else {
-                    // Payment required.
-                    var err = new Error('Payment Required');
-                    err.status = 402;
-                    return next(err);
-                }
+                // Get price to check if enclosure is free
+                enclosure.getPrice(function(err, price){
+                    if(err){
+                        return next(err);
+                    }
+                    else if (purchased || price == 0) {
+                        // User has paid for episode content
+                        // or episode is free.
+                        enclosure.listen();
+                        res.json(enclosure);
+                    }
+                    else {
+                        // Payment required.
+                        var err = new Error('Payment Required');
+                        err.status = 402;
+                        return next(err);
+                    }
+
+                })
             }
         })
 });

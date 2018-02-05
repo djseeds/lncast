@@ -27,7 +27,15 @@ router.get('/podcast/:podcastID', function (req, res, next){
             next(err);
         }
         else {
-            res.json(podcast);
+            // If user is logged in, check if they are subscribed
+            if(req.user){
+                console.log("IsSubscribed");
+                podcast.subscribed = req.user.isSubscribed(podcast._id);
+                res.json(podcast);
+            }
+            else{
+                res.json(podcast);
+            }
         }
     })
 });
@@ -105,7 +113,7 @@ router.get('/podcast/:podcastID/:episodeID', function (req, res, next) {
 });
 
 
-// GET podcast link
+// GET episode contents
 router.get('/enclosure/:enclosureID', function (req, res, next) {
     // Check if enclosure exists in db
     db.Enclosure.findById(req.params.enclosureID)
@@ -142,7 +150,7 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
 });
 
 
-/* GET all podcasts. */
+/* Add a podcast. */
 router.post('/add', function(req, res, next) {
     if(req.isAuthenticated()) {
         db.addPodcast(req.body.feed, req.body.price, function(err, podcast){
@@ -161,5 +169,37 @@ router.post('/add', function(req, res, next) {
     }
 })
 
+/* Subscribe to a podcast. */
+router.post('/subscribe', function(req, res, next) {
+    if(req.isAuthenticated()) {
+        req.user.subscribe(req.body.podcast, function(err){
+            if(err){
+                return next(err);
+            }
+            res.send("OK");
+        });
+    }
+    else {
+        res.status(401);
+        res.send("Access denied");
+    }
+})
+
+/* Unsubscribe to a podcast. */
+router.post('/unsubscribe', function(req, res, next) {
+    if(req.isAuthenticated()) {
+        req.user.unsubscribe(req.body.podcast, function(err){
+            console.log("Callback");
+            if(err){
+                return next(err);
+            }
+            res.send("OK");
+        });
+    }
+    else {
+        res.status(401);
+        res.send("Access denied");
+    }
+})
 
 module.exports = router;

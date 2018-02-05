@@ -24,6 +24,7 @@
         <script src="/js/controllers/RegisterCtrl.js"></script>
         <script src="/js/controllers/AccountCtrl.js"></script>
         <script src="/js/controllers/AddPodcastCtrl.js"></script>
+        <script src="/js/controllers/SubscriptionCtrl.js"></script>
         <script src="/node_modules/qrcode-generator/qrcode.js"></script>
         <script src="/node_modules/qrcode-generator/qrcode_UTF8.js"></script>
         <script src="/node_modules/angular-qrcode/angular-qrcode.js"></script>
@@ -43,6 +44,9 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
+                    <li class="nav-item", ng-hide="activeUser == undefined">
+                        <a class="nav-link" href="#!/subscriptions">Subscriptions</a>
+                    </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#!/add-podcast">Add a Podcast</a>
                 </li>

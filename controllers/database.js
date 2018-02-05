@@ -46,6 +46,7 @@ EpisodeSchema.methods.getPrice = function(callback){
         if(err){
             console.log(err);
             callback(err,null);
+            return;
         }
         callback(null, podcast.price);
     });
@@ -159,6 +160,8 @@ var PodcastSchema = new Schema ({
     price: {type: Number},
     earned: {type: Number, default: 0},
     listens: {type: Number, default: 0},
+    // TODO: Find another way to send this.
+    subscribed: {type: Boolean, default: false},
 },
 {
 toJSON : { virtuals: true },
@@ -221,6 +224,7 @@ var UserSchema = new Schema ({
     paid: [{type: Schema.ObjectId, ref: 'Invoice'}],
     purchased: [{type: Schema.ObjectId, ref: 'Enclosure'}],
     owns: [{type: Schema.ObjectId, ref: 'Podcast'}],
+    subscriptions: [{type: Schema.ObjectId, ref: 'Podcast'}],
     pubkey: String,
     address: String,
     balance: {type: Number, default: 0},
@@ -234,6 +238,76 @@ UserSchema.methods.withdraw = function(value, callback){
         }
         callback(null, user.balance);
     });
+}
+
+// Returns true if user is subscribed to given podcast.
+UserSchema.methods.isSubscribed = function(podcastID){
+    var found = false;
+    this.subscriptions.forEach(function(id){
+        if(String(id) == String(podcastID)){
+            found = true;
+        }
+    });
+    return found;
+}
+
+// Subscribe to a podcast by ID, if not alread subscribed. If the podcast is not
+// found, an error will be passed to callback.
+UserSchema.methods.subscribe = function(podcastID, callback){
+    var _this = this;
+    Podcast.findById(podcastID, function(err, podcast){
+        if(err){
+            callback(err);
+        }
+        else if(podcast){
+            if(_this.isSubscribed(podcast._id)){
+                // Already subscribed
+                callback(null);
+            }
+            else {
+                _this.subscriptions.push(podcast._id);
+                _this.save(callback);
+            }
+        }
+        else{
+            err = new Error("Podcast not found");
+            callback(err);
+        }
+    })
+}
+
+// Unsubscribe to a podcast by ID, if already subscribed. If the podcast is not
+// found, an error will be passed to callback.
+UserSchema.methods.unsubscribe = function(podcastID, callback){
+    var _this = this;
+    Podcast.findById(podcastID, function(err, podcast){
+        if(err){
+            callback(err);
+            return;
+        }
+        else if(podcast){
+            if(!_this.isSubscribed(podcast._id)){
+                // Not subscribed
+                callback(null);
+                return;
+            }
+            var i = _this.subscriptions.findIndex(function(id){
+                return String(id) == String(podcast._id);
+            })
+            if(i > -1){
+                _this.subscriptions.splice(i, 1);
+                _this.save(callback);
+            }
+            else{
+                callback(null);
+                return;
+            }
+        }
+        else{
+            err = new Error("Podcast not found");
+            callback(err);
+        }
+    })
 }
 
 UserSchema.pre('remove', function(next){

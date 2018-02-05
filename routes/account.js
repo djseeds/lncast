@@ -77,4 +77,22 @@ router.post('/withdraw', function(req, res, next) {
     }
 });
 
+router.get('/subscriptions', function(req,res,next){
+    if(req.isAuthenticated()){
+        req.user.populate('subscriptions', function(err, user){
+            if(err){
+                return next(err);
+            }
+            else{
+                res.json(user.subscriptions);
+            }
+        });
+        req.user.depopulate('subscriptions');
+    }
+    else {
+        res.status(401);
+        res.send("Access denied");
+    }
+})
+
 module.exports = router;

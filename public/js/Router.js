@@ -30,6 +30,10 @@ app.config(function ($routeProvider) {
             templateUrl: 'views/account.html',
             controller: 'AccountCtrl'
         })
+        .when('/subscriptions', {
+            templateUrl: 'views/subscriptions.html',
+            controller: 'SubscriptionCtrl'
+        })
         //Podcast page
         .when('/podcast/:podcastID', {
             templateUrl: 'views/podcast.html',

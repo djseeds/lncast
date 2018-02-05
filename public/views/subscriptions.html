@@ -1,0 +1,26 @@
+<!doctype html>
+
+<div class="jumbotron text-center">
+    <h1>My Subscriptions</h1>
+</div>
+
+<!-- Podcast List -->
+<div id="podcast-list" class="m-3">
+    <div ng-repeat="podcast in podcasts | orderBy:'date'">
+        <div class="container-fluid mb-1">
+            <div class="row">
+                <div class="col-2">
+                    <a ng-href="#!{{podcast.url}}">
+                        <img src="{{podcast.image.url}}" class="img-fluid img-thumbnail" />
+                    </a>
+                </div>
+                <div class="col">
+                    <a ng-href="#!{{podcast.url}}">
+                        <h2>{{podcast.title}}</h2>
+                    </a>
+                    <p ng-bind-html="podcast.description"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

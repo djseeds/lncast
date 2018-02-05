@@ -1,43 +1,50 @@
 <!doctype html>
 
-<div class="jumbotron text-center">
+<div class="jumbotron">
     <div class="row">
         <div class="col-2">
             <img src="{{podcast.image.url}}" class="img-fluid" />
         </div>
-        <div class="column">
-            <h1>{{podcast.title}}<h1>
+        <div class="col-10" align="center">
+            <h1>{{podcast.title}}</h1>
+            <p ng-bind-html="podcast.description"></p>
+            <!-- Subscribe Button -->
+            <button class="btn btn-primary" ng-click="subscribe(podcast)" ng-if="podcast.subscribed == false">Subscribe</button>
+            <button class="btn btn-primary" ng-click="unsubscribe(podcast)" ng-if="podcast.subscribed == true">Unsubscribe</button>
         </div>
     </div>
 </div>
-<!-- Filter and Sort-->
-<form class="container m-3">
-    <div class="form-row">
-        <div class="column">
-            <div class="form-group">
-                <label for="sortBy">Sort By</label>
-                <select class="custom-select custom-select-sm" id="sortBy" ng-model="sortBy" ng-init="sortBy='-pubdate'">
-                    <option value="-pubdate">Publish Date</option>
-                    <option value="-earned" selected>Highest Grossing</option>
-                    <option value="-listens">Most Listens</option>
-                    <option value="title">Title: A to Z</option>
-                    <option value="-title">Title: Z to A</option>
-                </select>
+
+<div class="m-3">
+    <!-- Filter and Sort-->
+    <form class="container m-0">
+        <div class="form-row">
+            <div class="column">
+                <div class="form-group">
+                    <label for="sortBy">Sort By</label>
+                    <select class="custom-select custom-select-sm" id="sortBy" ng-model="sortBy" ng-init="sortBy='-pubdate'">
+                        <option value="-pubdate">Publish Date</option>
+                        <option value="-earned" selected>Highest Grossing</option>
+                        <option value="-listens">Most Listens</option>
+                        <option value="title">Title: A to Z</option>
+                        <option value="-title">Title: Z to A</option>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
 
-<!-- Episode List -->
-<div id="episode-list" class="m-3">
-    <div ng-repeat="episode in podcast.episodes | orderBy:sortBy"> 
-        <div class="row">
+    <!-- Episode List -->
+    <div id="episode-list">
+        <div ng-repeat="episode in podcast.episodes | orderBy:sortBy"> 
+            <div class="row">
                 <div class="col">
                     <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">
                         <h2>{{episode.title}}</h2>
                     </a>
                     <p ng-bind-html="episode.summary || episode.description"></p>
                 </div>
+            </div>
+        </div>
     </div>
-</div>
 </div>

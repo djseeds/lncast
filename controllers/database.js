@@ -373,8 +373,8 @@ var updateEpisode = function(data){
 }
 
 var updatePodcast = function(data){
-    Podcast.findOne({'xmlurl': data.xmlurl}, function(podcast){
-        if(!podcast){
+    Podcast.findOne({'xmlurl': data.xmlurl}, function(err, podcast){
+        if(err || !podcast){
             return;
         }
         if(data.date > podcast.date){

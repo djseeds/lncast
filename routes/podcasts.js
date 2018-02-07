@@ -3,6 +3,7 @@ var crypto = require('crypto');
 var lightning = require('../controllers/lightning');
 var db = require('../controllers/database');
 var sessionCtrl = require('../controllers/session');
+var twitter = require('../controllers/twitter');
 
 var router = express.Router();
 
@@ -161,6 +162,15 @@ router.post('/add', function(req, res, next) {
             res.json(podcast);
             req.user.owns.push(podcast._id);
             req.user.save();
+            twitter.announcePodcast(podcast, function(err, tweet, response){
+                if(err){
+                    console.log("Failed to announce podcast!");
+                    console.log(err);
+                }
+                else{
+                    console.log("Successfully announced podcast!");
+                }
+            });
         });
     }
     else {

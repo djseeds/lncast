@@ -3,6 +3,8 @@ var FeedParser = require('feedparser');
 var request = require('request');
 var mongoose = require('mongoose');
 var passportLocalMongoose = require('passport-local-mongoose');
+var twitter = require('../controllers/twitter');
+
 var Schema = mongoose.Schema;
 
 var mongoDB = 'mongodb://127.0.0.1/my_database';
@@ -340,35 +342,43 @@ var updateEpisode = function(data){
     Episode.findOne({'guid': data.guid})
         .populate('enclosure')
         .exec(function(err, episode){
-        if(!episode){
-            console.log(data);
-            // Add a new episode
-            Podcast.findOne({'xmlurl': data.meta.xmlurl}, function(err, podcast){
-                if(podcast){
-                    episode = new Episode(data);
-                    if(data.enclosures){
-                        var enclosure = data.enclosures[0];
+            if(!episode){
+                // Add a new episode
+                Podcast.findOne({'xmlurl': data.meta.xmlurl}, function(err, podcast){
+                    if(podcast){
+                        episode = new Episode(data);
+                        if(data.enclosures){
+                            var enclosure = data.enclosures[0];
+                            episode.enclosure = new Enclosure(enclosure);
+                            episode.enclosure.save();
+                        }
+                        episode.save();
+                        podcast.episodes.push(episode);
+                        podcast.save();
+                        twitter.announceEpisode(podcast, episode, function(err, tweet, response){
+                            if(err){
+                                console.log("Failed to announce episode!");
+                                console.log(err);
+                            }
+                            else{
+                                console.log("Successfully announced episode!");
+                            }
+                        })
+                    }
+                })
+            }
+            else if(data.date > episode.date){
+                if(data.enclosures){
+                    var enclosure = data.enclosures[0];
+                    if(episode.enclosure.url != enclosure.url){
                         episode.enclosure = new Enclosure(enclosure);
                         episode.enclosure.save();
                     }
-                    episode.save();
-                    podcast.episodes.push(episode);
-                    podcast.save();
                 }
-            });
-        }
-        else if(data.date > episode.date){
-            if(data.enclosures){
-                var enclosure = data.enclosures[0];
-                if(episode.enclosure.url != enclosure.url){
-                    episode.enclosure = new Enclosure(enclosure);
-                    episode.enclosure.save();
-                }
+                Object.assign(episode, data);
+                episode.save();
             }
-            Object.assign(episode, data);
-            episode.save();
-        }
-    })
+        })
 
 }
 

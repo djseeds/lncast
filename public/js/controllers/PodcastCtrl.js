@@ -1,8 +1,12 @@
-angular.module('myApp').controller('PodcastCtrl', ['$scope', '$http', '$routeParams', '$location', function podcastController($scope, $http, $routeParams, $location) {
+angular.module('myApp').controller('PodcastCtrl', ['$scope', '$http', '$routeParams', '$location', '$rootScope', function podcastController($scope, $http, $routeParams, $location, $rootScope) {
     $http.get('/api/podcast/' + $routeParams.podcastID).then(
             function(response){
                 $scope.podcast = response.data;
-                console.log(response.data);
+               $rootScope.meta = {
+                    title: response.data.title,
+                    description: response.data.description,
+                    image: response.data.image.url,
+                }
             },
             function(error){
             })

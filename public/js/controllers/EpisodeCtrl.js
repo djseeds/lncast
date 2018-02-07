@@ -1,4 +1,4 @@
-angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routeParams', '$timeout', function podcastController($scope, $http, $routeParams, $timeout) {
+angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$rootScope', '$http', '$routeParams', '$timeout', function podcastController($scope, $rootScope, $http, $routeParams, $timeout) {
 
     $scope.pay_req_generated = false;
 
@@ -6,6 +6,11 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$http', '$routePar
         function(response){
             $scope.episode = response.data.episode;
             $scope.podcast = response.data.podcast;
+            $rootScope.meta = {
+                title: $scope.episode.title,
+                description: $scope.episode.description,
+                image: $scope.podcast.image.url,
+            }
             $scope.episode.unlocked = false;
             pollEpisodeLink(true);
         },

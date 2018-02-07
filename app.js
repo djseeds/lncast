@@ -32,6 +32,8 @@ app.use(session({
     cookie: { maxAge: 3600000 },
 }));
 
+app.use(require('prerender-node'));
+
 app.use(passport.initialize());
 app.use(passport.session());
 

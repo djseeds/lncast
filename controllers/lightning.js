@@ -3,6 +3,11 @@ var fs = require('fs');
 var os = require('os');
 var events = require('events');
 var db = require('./database') 
+// Default is ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+// https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
+// Current LND cipher suites here:
+// https://github.com/lightningnetwork/lnd/blob/master/lnd.go#L80
+process.env.GRPC_SSL_CIPHER_SUITES = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256'
 
 var certPath = os.homedir() + '/.lnd/tls.cert';
 var lndCert = fs.readFileSync(certPath);
@@ -20,6 +25,7 @@ var lightning = new lnrpc.Lightning('localhost:10009', credentials);
 var pubkey = "";
 // Get node pubkey
 lightning.getInfo({}, meta, function(err, response) {
+    if(err){console.log(err)}
     pubkey = response.identity_pubkey;
 });
 

@@ -14,7 +14,7 @@
     "express-https-redirect": "^1.0.0",
     "express-session": "^1.15.6",
     "feedparser": "^2.2.7",
-    "grpc": "^1.8.0",
+    "grpc": "^1.11.3",
     "mongoose": "^4.13.7",
     "morgan": "~1.9.0",
     "ngclipboard": "^1.1.2",

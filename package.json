@@ -5,6 +5,11 @@
   "scripts": {
     "start": "node ./bin/www"
   },
+  "bin": "bin/www",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/djseeds/lncast.git"
+  },
   "dependencies": {
     "angular-qrcode": "^7.2.0",
     "body-parser": "~1.18.2",

@@ -13,7 +13,7 @@ var certPath = os.homedir() + '/.lnd/tls.cert';
 var lndCert = fs.readFileSync(certPath);
 var credentials = grpc.credentials.createSsl(lndCert);
 
-var macaroonPath = os.homedir() + '/.lnd/admin.macaroon';
+var macaroonPath = os.homedir() + '/.lnd/data/chain/bitcoin/testnet/admin.macaroon';
 var lndMacaroon = fs.readFileSync(macaroonPath).toString("hex");
 var meta = new grpc.Metadata();
 meta.add('macaroon', lndMacaroon);

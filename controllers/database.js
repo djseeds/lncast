@@ -502,6 +502,10 @@ module.exports.addPodcast = function(feed, price, callback){
             callback(err, null);
             return;
         }
+        if(podcast == null) {
+            callback(new Error("Unable to add podcast."))
+            return;
+        }
         podcast.price = price;
         podcast.episodes.forEach( function(episode){
             if(episode.enclosure){

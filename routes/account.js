@@ -1,20 +1,23 @@
 var express = require('express');
 var lightning = require('../controllers/lightning');
+var db = require('../controllers/database');
 
 var router = express.Router();
 
 /* GET user info. */
 router.get('/', function(req, res, next) {
     if(req.isAuthenticated()){
-        req.user.populate('owns', function(err, user){
-            if(err){
-                res.json(req.user);
-            }
-            else{
-                res.json(user);
-            }
-        });
-        req.user.depopulate('owns');
+        console.log(req.user);
+        db.User.findById(req.user._id)
+            .populate('owns')
+            .exec(function(err,user) {
+                if(err){
+                    res.json(req.user);
+                }
+                else{
+                    res.json(user);
+                }
+            });
     }
     else {
         res.status(401);
@@ -31,7 +34,6 @@ router.delete('/', function(req, res, next) {
             }
             res.send("OK");
         });
-        req.user.depopulate('owns');
     }
     else {
         res.status(401);
@@ -79,7 +81,9 @@ router.post('/withdraw', function(req, res, next) {
 
 router.get('/subscriptions', function(req,res,next){
     if(req.isAuthenticated()){
-        req.user.populate('subscriptions', function(err, user){
+        db.User.findById(req.user._id)
+            .populate('subscriptions')
+            .exec(function(err,user) {
             if(err){
                 return next(err);
             }
@@ -87,7 +91,6 @@ router.get('/subscriptions', function(req,res,next){
                 res.json(user.subscriptions);
             }
         });
-        req.user.depopulate('subscriptions');
     }
     else {
         res.status(401);

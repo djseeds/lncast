@@ -7,10 +7,9 @@ var twitter = require('../controllers/twitter');
 
 var Schema = mongoose.Schema;
 
-var mongoDB = 'mongodb://127.0.0.1/my_database';
-mongoose.connect(mongoDB, {
-    useMongoClient: true
-});
+var mongoDB = 'mongodb://127.0.0.1/lncast';
+mongoose.connect(mongoDB, {useNewUrlParser: true});
+mongoose.set('useCreateIndex', true);
 
 mongoose.Promise = global.Promise;
 

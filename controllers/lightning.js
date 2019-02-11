@@ -1,4 +1,5 @@
 var grpc = require('grpc');
+var protoLoader = require('@grpc/proto-loader');
 var fs = require('fs');
 var os = require('os');
 var events = require('events');
@@ -18,7 +19,8 @@ var lndMacaroon = fs.readFileSync(macaroonPath).toString("hex");
 var meta = new grpc.Metadata();
 meta.add('macaroon', lndMacaroon);
 
-var lnrpcDescriptor = grpc.load(__dirname + '/../lnd/lnrpc/rpc.proto');
+var packageDefinition = protoLoader.loadSync(__dirname + '/../lnd/lnrpc/rpc.proto', {keepCase: true});
+var lnrpcDescriptor = grpc.loadPackageDefinition(packageDefinition);
 var lnrpc = lnrpcDescriptor.lnrpc;
 var lightning = new lnrpc.Lightning('localhost:10009', credentials);
 

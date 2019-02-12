@@ -3,7 +3,7 @@
 [LNCast](https://lncast.com) leverages the Bitcoin Lightning Network to enable creators to monetize their podcasts with micropayments.
 
 ## Demo
-![Demo Payment GIF](https://media.giphy.com/media/xUNd9KyCXSvKuaPp1m/giphy.gif)
+![Demo Payment GIF](https://media.giphy.com/media/WgRum5oRnEZQKYD2Ya/giphy.gif)
 
 ## How it Works
 

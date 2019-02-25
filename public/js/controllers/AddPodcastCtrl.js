@@ -8,6 +8,7 @@ angular.module('myApp').controller('AddPodcastCtrl', ['$rootScope', '$scope', '$
         $http.post('/api/add', {
             feed: $scope.feed,
             price: $scope.price,
+            btcPayServer: $scope.btcPayServer
         }).then(
             function(response){
                 $location.path(response.data.url);

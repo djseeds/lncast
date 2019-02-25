@@ -1,70 +1,35 @@
 #!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-
 var app = require('../app');
 var debug = require('debug')('lncast:server');
 var https = require('https');
 var http = require('http');
 var fs = require('fs');
 
-/**
- * Get port from environment and store in Express.
- */
+//const credentials = {
+//    key: fs.readFileSync(process.env.SSL_KEY),
+//    cert: fs.readFileSync(process.env.SSL_CERT)
+//}
 
-/**
- * Create HTTPS server.
- */
-
-const credentials = {
-    key: fs.readFileSync(process.env.SSL_KEY),
-    cert: fs.readFileSync(process.env.SSL_CERT)
-}
-
-var https_server = https.createServer(credentials, app);
+//var https_server = https.createServer(credentials, app);
 var http_server = http.createServer(app);
 // Redirect from http port 80 to https
-var http = require('http');
-http.createServer(function (req, res) {
-        res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url  });
-        res.end();
+//http.createServer(function (req, res) {
+//        res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url  });
+//        res.end();
+//
+//        }).listen(80);
 
-        }).listen(80);
+//https_server.listen(443);
+//https_server.on('error', onError);
+//https_server.on('listening', onListening);
 
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-https_server.listen(443);
-https_server.on('error', onError);
-https_server.on('listening', onListening);
-
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
+http_server.listen(8080);
+http_server.on('error', onError);
+http_server.on('listening', onListening);
 
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
@@ -94,7 +59,7 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = https_server.address();
+  var addr = http_server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;

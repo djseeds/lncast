@@ -1,9 +1,9 @@
 var express = require('express');
 var crypto = require('crypto');
-var lightning = require('../controllers/lightning');
 var db = require('../controllers/database');
 var sessionCtrl = require('../controllers/session');
 var twitter = require('../controllers/twitter');
+var btcpay = require('../controllers/btcpay')
 
 var router = express.Router();
 
@@ -44,7 +44,6 @@ router.get('/podcast/:podcastID', function (req, res, next){
 /* POST (update) podcast */
 router.post('/podcast/:podcastID', function (req, res, next){
     if(req.isAuthenticated() && req.user.owns.findIndex(function(id){
-        console.log("findIndex");
         return id.toString() == req.params.podcastID;
     }) != -1) {
         db.Podcast.findById(req.params.podcastID, function(err, podcast){
@@ -116,60 +115,121 @@ router.get('/podcast/:podcastID/:episodeID', function (req, res, next) {
 
 // GET episode contents
 router.get('/enclosure/:enclosureID', function (req, res, next) {
-    // Check if enclosure exists in db
-    db.Enclosure.findById(req.params.enclosureID)
-        .exec(function(err, enclosure) {
-            if(err) {
-                var err = new Error('Not found.');
-                err.status = 404;
-                return next(err);
-            }
-            else {
-                // If user has paid for episode content
-                purchased = (sessionCtrl.purchased(req, req.params.enclosureID));
-                // Get price to check if enclosure is free
-                enclosure.getPrice(function(err, price){
-                    if(err){
-                        return next(err);
-                    }
-                    else if (purchased || price == 0) {
-                        // User has paid for episode content
-                        // or episode is free.
+    db.Enclosure.findById(req.params.enclosureID).exec(function (err, enclosure) {
+        if (err) {
+            var err = new Error('Not found.');
+            err.status = 404;
+            return next(err);
+        }
+        var invoiceId = sessionCtrl.getInvoice(req, enclosure._id);
+        // User hasn't yet purchased enclosure.
+        if (invoiceId == null) {
+            // First check if enclosure is free:
+            enclosure.getPrice(function(err, price) {
+                if (price == 0) {
+                    enclosure.listen();
+                    res.json(enclosure);
+                }
+                else {
+                    // Create invoice
+                    btcpay.addInvoice(enclosure, function(err, invoice) {
+                        if (err) {
+                            err.status = 500;
+                            return next(err);
+                        }
+                        // Add to pending invoices
+                        sessionCtrl.addInvoice(req, invoice, req.params.enclosureID);
+                        // Return invoice info
+                        res.status = 402;
+                        res.statusMessage = "Payment Required.";
+                        res.json(invoice);
+                    })
+                }
+            })
+        }
+        else {
+            btcpay.getInvoice(invoiceId, function(err, invoice) {
+                if (err) {
+                    err.status = 500;
+                    return next(err);
+                }
+                switch (invoice.status) {
+                    case "complete":
+                        // Enclosure has been paid for, so return it.
                         enclosure.listen();
                         res.json(enclosure);
-                    }
-                    else {
-                        // Payment required.
-                        var err = new Error('Payment Required');
-                        err.status = 402;
-                        return next(err);
-                    }
+                        break;
+                    case "expired":
+                    case "invalid":
+                        // Remove existing invoice.
+                        sessionCtrl.removeInvoice(req, enclosure._id);
+                        // Create new invoice.
+                        btcpay.addInvoice(enclosure, function (err, invoice) {
+                            if (err) {
+                                err.status = 500;
+                                return next(err);
+                            }
+                            // Add to pending invoices
+                            invoice = new db.Invoice(invoice);
+                            sessionCtrl.addInvoice(req, invoice._id, req.params.enclosureID);
+                            // Return invoice info
+                            response_data = invoice;
+                            res.json(response_data);
+                        });
+                    default:
+                        // Invoice is pending.
+                        // Return pending invoice.
+                        res.status = 402;
+                        res.statusMessage = "Payment Required.";
+                        res.json(invoice);
+                        break;
+                }
 
-                })
-            }
-        })
+            })
+        }
+    });
+
 });
 
 
 /* Add a podcast. */
-router.post('/add', function(req, res, next) {
-    if(req.isAuthenticated()) {
-        db.addPodcast(req.body.feed, req.body.price, function(err, podcast){
-            if(err){
-                console.log(err);
+router.post('/add', function (req, res, next) {
+    if (req.isAuthenticated()) {
+        if(req.body.btcPayServer == null) {
+            var err = new Error("btcPayServer is required.");
+            err.status = 400;
+            return next(err);
+        }
+        else if (req.body.btcPayServer.nodeInfoUrl == null) {
+            var err = new Error("btcPayServer.nodeInfoUrl is required.");
+            err.status = 400;
+            return next(err);
+        }
+        btcpay.pairClient(req.body.btcPayServer.url, req.body.btcPayServer.pairCode, function (err, merchantId) {
+            if (err) {
                 return next(err);
             }
-            res.json(podcast);
-            req.user.owns.push(podcast._id);
-            req.user.save();
-            twitter.announcePodcast(podcast, function(err, tweet, response){
-                if(err){
-                    console.log("Failed to announce podcast!");
-                    console.log(err);
+            var btcPayServerInfo = {
+                serverUrl: req.body.btcPayServer.url,
+                nodeInfoUrl: req.body.btcPayServer.nodeInfoUrl,
+                merchantCode: merchantId,
+            }
+            db.addPodcast(req.body.feed, req.body.price, btcPayServerInfo, function (err, podcast) {
+                if (err) {
+                    return next(err);
                 }
-                else{
-                    console.log("Successfully announced podcast!");
-                }
+                res.json(podcast);
+                req.user.owns.push(podcast._id);
+                req.user.save();
+                twitter.announcePodcast(podcast, function (err) {
+                    if (err) {
+                        console.log("Failed to announce podcast!");
+                        console.log(err);
+                    }
+                    else {
+                        console.log("Successfully announced new podcast!");
+                    }
+                });
             });
         });
     }

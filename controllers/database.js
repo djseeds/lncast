@@ -53,6 +53,16 @@ EpisodeSchema.methods.getPrice = function(callback){
     });
 }
 
+EpisodeSchema.methods.getPodcast = function(callback){
+    Podcast.findOne({"episodes": this._id}, function(err, podcast){
+        if(err){
+            callback(err,null);
+            return;
+        }
+        callback(null, podcast);
+    });
+}
+
 EpisodeSchema.methods.credit = function(value){
     this.earned += parseInt(value, 10);
     this.save();
@@ -113,6 +123,16 @@ EnclosureSchema.methods.getPrice = function(callback){
     });
 }
 
+EnclosureSchema.methods.getPodcast = function(callback){
+    Episode.findOne({"enclosure": this._id}, function(err, episode){
+        if(err){
+            console.log(err);
+            callback(err,null);
+        }
+        episode.getPodcast(callback);
+    });
+}
+
 EnclosureSchema.methods.credit = function(value){
     Episode.findOne({"enclosure": this._id}, function(err, episode){
         if(err){
@@ -135,10 +155,9 @@ EnclosureSchema.methods.listen = function(){
 
 var Enclosure = mongoose.model('Enclosure', EnclosureSchema, 'Enclosure');
 
-// Schema for enclosure (attached media)
+// Schema for BTCPayServer invoices.
 var InvoiceSchema = new Schema({
-    r_hash: Buffer,
-    payment_request: String,
+    id: {type: String, required: true, unique: true}
 });
 
 var Invoice = mongoose.model('Invoice', InvoiceSchema, 'Invoice');
@@ -163,6 +182,11 @@ var PodcastSchema = new Schema ({
     listens: {type: Number, default: 0},
     // TODO: Find another way to send this.
     subscribed: {type: Boolean, default: false},
+    btcPayServer: {
+        serverUrl: {type: String, required: true},
+        merchantCode : {type: String, required: true},
+        nodeInfoUrl: {type: String, required: true},
+    }
 },
 {
 toJSON : { virtuals: true },
@@ -218,12 +242,10 @@ var Podcast = mongoose.model('Podcast', PodcastSchema, 'Podcast');
 var UserSchema = new Schema ({
     username: {type: String, required: true, unique: true},
     password: String,
-    pending: [{
+    invoices: [{
         invoice: {type: Schema.ObjectId, ref: 'Invoice'},
         enclosure: {type:  Schema.ObjectId, ref: 'Enclosure'}
     }],
-    paid: [{type: Schema.ObjectId, ref: 'Invoice'}],
-    purchased: [{type: Schema.ObjectId, ref: 'Enclosure'}],
     owns: [{type: Schema.ObjectId, ref: 'Podcast'}],
     subscriptions: [{type: Schema.ObjectId, ref: 'Podcast'}],
     pubkey: String,
@@ -494,7 +516,7 @@ var parseFeed = function(feed, callback){
     .pipe(feedparser);
 }
 
-module.exports.addPodcast = function(feed, price, callback){
+module.exports.addPodcast = function(feed, price, btcPayServerInfo, callback){
     parseFeed(feed, function(err, podcast) {
         if(err) {
             console.log(err);
@@ -506,7 +528,8 @@ module.exports.addPodcast = function(feed, price, callback){
             return;
         }
         podcast.price = price;
-        podcast.episodes.forEach( function(episode){
+        podcast.btcPayServer = btcPayServerInfo;
+        podcast.episodes.forEach(function (episode) {
             if(episode.enclosure){
                 episode.enclosure.save(function(err){
                     if(err) console.log(err);

@@ -17,6 +17,18 @@
                             </small>
                         </div>
                         <div class="form-group">
+                            <label for="btcPayServer.url">BTCPayServer URL</label>
+                            <input class="form-control" required="required" placeholder="https://testnet.demo.btcpayserver.org" name="btcPayServer.url" ng-model="btcPayServer.url" type="url" autofocus=""></input>
+                        </div>
+                        <div class="form-group">
+                            <label for="btcPayServer.pairCode">BTCPayServer Pairing Code</label>
+                            <input class="form-control" required="required" placeholder="abcd123" name="btcPayServer.pairCode" ng-model="btcPayServer.pairCode" type="string" autofocus=""></input>
+                        </div>
+                        <div class="form-group">
+                            <label for="btcPayServer.nodeInfoUrl">BTCPayServer Node Info URL</label>
+                            <input class="form-control" required="required" placeholder="https://testnet.demo.btcpayserver.org/embed/7154GQDkwVPfEnh7gx5VjagMWmZZ3v3AGd3qGace8GSV/BTC/ln" name="btcPayServer.nodeInfoUrl" ng-model="btcPayServer.nodeInfoUrl" type="url" autofocus=""></input>
+                        </div>
+                        <div class="form-group">
                             <label for="price">Per-Episode Price</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">

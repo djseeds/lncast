@@ -14,6 +14,7 @@
     "@grpc/proto-loader": "^0.4.0",
     "angular-qrcode": "^7.2.0",
     "body-parser": "~1.18.2",
+    "btcpay": "github:btcpayserver/node-btcpay",
     "cookie-parser": "~1.4.3",
     "debug": "~4.1.1",
     "express": "~4.16.4",

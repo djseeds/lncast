@@ -20,7 +20,7 @@
         <audio controls autoplay><source src="{{episode.enclosure.url}}"></audio>
     </div>
     <div ng-if="!episode.unlocked && !pay_req_generated" ng-cloak>
-        <button ng-click="getPayReq()" type="button" class="btn btn-primary">Buy Episode: t${{podcast.price}}</button>
+        <button ng-click="pollEpisodeLink()" type="button" class="btn btn-primary">Buy Episode: t${{podcast.price}}</button>
     </div>
     <div class="card bg-secondary mb-3" ng-if="pay_req_generated && !episode.unlocked">
         <div class="card-block m-2">

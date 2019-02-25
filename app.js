@@ -5,18 +5,14 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
 var passport = require('passport');
 var httpsRedirect = require('express-https-redirect')
 var cron = require('node-cron');
 
 var podcasts = require('./routes/podcasts');
-var lightning = require('./routes/lightning');
 var account = require('./routes/account');
 var db = require('./controllers/database');
 var sessionCtrl = require('./controllers/session');
-
-var LocalStrategy = require('passport-local').Strategy;
 
 // Refresh all podcasts every 15 minutes.
 cron.schedule('*/15 * * * *', db.refreshAll);
@@ -57,7 +53,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('*', httpsRedirect());
 
 app.use('/api', podcasts);
-app.use('/api/lightning', lightning)
 app.use('/api/account', account);
 
 app.post('/register', function(req, res, next){

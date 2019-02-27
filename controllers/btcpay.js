@@ -34,7 +34,7 @@ module.exports.addInvoice = function (enclosure, callback) {
   })
 }
 
-module.exports.getInvoice = function (invoiceId, callback) {
+module.exports.getInvoice = function (invoiceId, enclosure, callback) {
   enclosure.getPodcast(function (err, podcast) {
     if (err) {
       callback(err);
@@ -42,7 +42,7 @@ module.exports.getInvoice = function (invoiceId, callback) {
     }
     getBtcPayClient(podcast).get_invoice(invoiceId)
       .then(function (invoice) {
-        callback(invoice);
+        callback(null, invoice);
       })
       .catch(function (err) {
         callback(err);

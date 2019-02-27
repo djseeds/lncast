@@ -157,7 +157,15 @@ var Enclosure = mongoose.model('Enclosure', EnclosureSchema, 'Enclosure');
 
 // Schema for BTCPayServer invoices.
 var InvoiceSchema = new Schema({
-    id: {type: String, required: true, unique: true}
+    id: {type: String, required: true, unique: true},
+    price: {type: Number, required: true},
+    currency: {type: String, required: true},
+    url: {type: String},
+    invoiceTime: {type: Number},
+    expirationTime: {type: Number},
+    addresses: {
+        BTC_LightningLike: {type: String, required: true}
+    }
 });
 
 var Invoice = mongoose.model('Invoice', InvoiceSchema, 'Invoice');
@@ -184,8 +192,8 @@ var PodcastSchema = new Schema ({
     subscribed: {type: Boolean, default: false},
     btcPayServer: {
         serverUrl: {type: String, required: true},
+        storeId: {type: String, required: true},
         merchantCode : {type: String, required: true},
-        nodeInfoUrl: {type: String, required: true},
     }
 },
 {
@@ -195,6 +203,10 @@ toJSON : { virtuals: true },
 PodcastSchema.virtual('url').get(function(){
     return '/podcast/' + this._id;
 });
+
+PodcastSchema.virtual('btcPayServer.nodeInfoUrl').get(function(){
+    return this.btcPayServer.serverUrl + "/embed/" + this.btcPayServer.storeId + "/BTC/ln"
+})
 
 PodcastSchema.methods.credit = function(value){
     this.earned += parseInt(value, 10);

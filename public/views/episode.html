@@ -20,7 +20,7 @@
         <audio controls autoplay><source src="{{episode.enclosure.url}}"></audio>
     </div>
     <div ng-if="!episode.unlocked && !pay_req_generated" ng-cloak>
-        <button ng-click="pollEpisodeLink()" type="button" class="btn btn-primary">Buy Episode: t${{podcast.price}}</button>
+        <button ng-click="pollEpisodeLink(true)" type="button" class="btn btn-primary">Buy Episode: t${{podcast.price}}</button>
     </div>
     <div class="card bg-secondary mb-3" ng-if="pay_req_generated && !episode.unlocked">
         <div class="card-block m-2">
@@ -33,34 +33,32 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">⚡</span>
                 </div>
-                <input id="pay_req" type="text" class="form-control" value="{{pay_req}}"readonly>
+                <input id="pay_req" type="text" class="form-control" value="{{invoice.addresses.BTC_LightningLike}}"readonly>
                 <button title="Copy Payment Request" class="btn btn-secondary" ngclipboard data-clipboard-target="#pay_req"><i class="fa fa-copy"></i></button>
-                <a title="Open in Lightning-Enabled Wallet"class="btn btn-secondary" href="lightning:{{pay_req}}"><i class="fa fa-external-link"></i></a>
+                <a title="Open in Lightning-Enabled Wallet"class="btn btn-secondary" href="lightning:{{invoice.addresses.BTC_LightningLike}}"><i class="fa fa-external-link"></i></a>
                 <button title="View Request QR Code" class="btn btn-secondary" data-target="#req-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
             </div>
             <div class="collapse" id="req-qrcode">
                 <div class="card bg-light mb-3" style="display: inline-block">
                     <div class="card-header text-center">Payment Request QR Code</div>
                     <div class="card-body">
-                        <qrcode size="200"  class="m-3" href="lightning:{{pay_req}}" data="lightning:{{pay_req}}"></qrcode>
+                        <qrcode size="200"  class="m-3" href="lightning:{{invoice.addresses.BTC_LightningLike}}" data="lightning:{{invoice.addresses.BTC_LightningLike}}"></qrcode>
                     </div>
                 </div>
             </div>
             <div class="input-group m-2">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Peer:</span>
+                <div class="m-1">
+                    <button title="Toggle Peer QR Code" class="btn btn-secondary" data-target="#peer-qrcode" data-toggle="collapse"
+                        ng-click="showPeerInfo = !showPeerInfo">{{!showPeerInfo ? "Show" : "Hide"}} Node Info <i class="fa fa-qrcode"></i></button>
                 </div>
-                <input type="text" id="peer" class="form-control" value="{{pubkey}}@{{hostname}}" readonly>
-                <button title="Copy Peer Address" class="btn btn-secondary" ngclipboard data-clipboard-target="#peer"><i class="fa fa-copy"></i></button>
-                <button title="View Peer QR Code" class="btn btn-secondary" data-target="#peer-qrcode" data-toggle="collapse"><i class="fa fa-qrcode"></i></button>
+                <div class="m-1">
+                    <a target="_blank" rel="noopener noreferrer" title="Open BTCPayServer Node Info Page" class="btn btn-secondary"
+                        href="{{podcast.btcPayServer.nodeInfoUrl | trusted}}">Open
+                        Node Info Page <i class="fa fa-external-link"></i></a>
+                </div>
             </div>
             <div id="peer-qrcode" class="collapse">
-                <div class="card bg-light mb-3" style="display: inline-block">
-                    <div class="card-header text-center">Peer QR Code</div>
-                    <div class="card-body">
-                        <qrcode size="200" class="m-3" data="{{pubkey}}@{{hostname}}"></qrcode>
-                    </div>
-                </div>
+                <iframe height="500" width="400" src="{{podcast.btcPayServer.nodeInfoUrl | trusted}}"></iframe>
             </div>
         </div>
     </div>

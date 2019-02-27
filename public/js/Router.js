@@ -54,3 +54,8 @@ app.config(function ($routeProvider) {
 .config(['$compileProvider', function($compileProvider){
     $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|lightning):/);
 }]);
+app.filter('trusted', ['$sce', function ($sce) {
+    return function(url) {
+        return $sce.trustAsResourceUrl(url);
+    };
+}]);

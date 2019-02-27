@@ -125,66 +125,70 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
         // User hasn't yet purchased enclosure.
         if (invoiceId == null) {
             // First check if enclosure is free:
-            enclosure.getPrice(function(err, price) {
+            enclosure.getPrice(function (err, price) {
                 if (price == 0) {
                     enclosure.listen();
                     res.json(enclosure);
                 }
                 else {
                     // Create invoice
-                    btcpay.addInvoice(enclosure, function(err, invoice) {
+                    btcpay.addInvoice(enclosure, function (err, invoice) {
                         if (err) {
                             err.status = 500;
                             return next(err);
                         }
                         // Add to pending invoices
-                        sessionCtrl.addInvoice(req, invoice, req.params.enclosureID);
+                        invoice = new db.Invoice(invoice);
+                        invoice.save();
+                        sessionCtrl.addInvoice(req, invoice._id, req.params.enclosureID);
                         // Return invoice info
-                        res.status = 402;
-                        res.statusMessage = "Payment Required.";
-                        res.json(invoice);
+                        res.status(402).json(invoice);
                     })
                 }
             })
         }
         else {
-            btcpay.getInvoice(invoiceId, function(err, invoice) {
-                if (err) {
-                    err.status = 500;
+            db.Invoice.findById(invoiceId).exec(function (err, invoice) {
+                if(err) {
                     return next(err);
                 }
-                switch (invoice.status) {
-                    case "complete":
-                        // Enclosure has been paid for, so return it.
-                        enclosure.listen();
-                        res.json(enclosure);
-                        break;
-                    case "expired":
-                    case "invalid":
-                        // Remove existing invoice.
-                        sessionCtrl.removeInvoice(req, enclosure._id);
-                        // Create new invoice.
-                        btcpay.addInvoice(enclosure, function (err, invoice) {
-                            if (err) {
-                                err.status = 500;
-                                return next(err);
-                            }
-                            // Add to pending invoices
-                            invoice = new db.Invoice(invoice);
-                            sessionCtrl.addInvoice(req, invoice._id, req.params.enclosureID);
-                            // Return invoice info
-                            response_data = invoice;
-                            res.json(response_data);
-                        });
-                    default:
-                        // Invoice is pending.
-                        // Return pending invoice.
-                        res.status = 402;
-                        res.statusMessage = "Payment Required.";
-                        res.json(invoice);
-                        break;
-                }
+                btcpay.getInvoice(invoice.id, enclosure, function (err, invoice) {
+                    if (err) {
+                        err.status = 500;
+                        return next(err);
+                    }
+                    switch (invoice.status) {
+                        case "complete":
+                            // Enclosure has been paid for, so return it.
+                            enclosure.listen();
+                            res.json(enclosure);
+                            break;
+                        case "expired":
+                        case "invalid":
+                            // Remove existing invoice.
+                            sessionCtrl.removeInvoice(req, enclosure._id);
+                            // Create new invoice.
+                            btcpay.addInvoice(enclosure, function (err, invoice) {
+                                if (err) {
+                                    err.status = 500;
+                                    return next(err);
+                                }
+                                // Add to pending invoices
+                                invoice = new db.Invoice(invoice);
+                                invoice.save();
+                                sessionCtrl.addInvoice(req, invoice._id, req.params.enclosureID);
+                                // Return invoice info
+                                response_data = invoice;
+                                res.json(response_data);
+                            });
+                        default:
+                            // Invoice is pending.
+                            // Return pending invoice.
+                            res.status(402).json(invoice);
+                            break;
+                    }
 
+                })
             })
         }
     });
@@ -200,8 +204,8 @@ router.post('/add', function (req, res, next) {
             err.status = 400;
             return next(err);
         }
-        else if (req.body.btcPayServer.nodeInfoUrl == null) {
-            var err = new Error("btcPayServer.nodeInfoUrl is required.");
+        else if (req.body.btcPayServer.storeId == null) {
+            var err = new Error("btcPayServer.storeId is required.");
             err.status = 400;
             return next(err);
         }
@@ -211,7 +215,7 @@ router.post('/add', function (req, res, next) {
             }
             var btcPayServerInfo = {
                 serverUrl: req.body.btcPayServer.url,
-                nodeInfoUrl: req.body.btcPayServer.nodeInfoUrl,
+                storeId: req.body.btcPayServer.storeId,
                 merchantCode: merchantId,
             }
             db.addPodcast(req.body.feed, req.body.price, btcPayServerInfo, function (err, podcast) {

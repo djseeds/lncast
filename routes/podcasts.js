@@ -3,7 +3,8 @@ var crypto = require('crypto');
 var db = require('../controllers/database');
 var sessionCtrl = require('../controllers/session');
 var twitter = require('../controllers/twitter');
-var btcpay = require('../controllers/btcpay')
+var btcpay = require('../controllers/btcpay');
+var flatten = require('flat');
 
 var router = express.Router();
 
@@ -46,27 +47,51 @@ router.post('/podcast/:podcastID', function (req, res, next){
     if(req.isAuthenticated() && req.user.owns.findIndex(function(id){
         return id.toString() == req.params.podcastID;
     }) != -1) {
-        db.Podcast.findById(req.params.podcastID, function(err, podcast){
-            if(err){
-                return next(err);
+        if (req.body.btcPayServer) {
+            if ((req.body.btcPayServer.serverUrl == null)
+                != (req.body.btcPayServer.pairCode == null)) {
+                return next(new Error("serverUrl and pairCode can only be updated together."));
             }
-            if(!podcast){
-                res.status(404);
-                res.send("Not Found");
-                return;
+            else if (req.body.btcPayServer.serverUrl && req.body.btcPayServer.pairCode) {
+                btcpay.pairClient(req.body.btcPayServer.serverUrl, req.body.btcPayServer.pairCode, function (err, merchantId) {
+                    if (err) {
+                        return next(err);
+                    }
+                    // Update merchant ID.
+                    req.body.btcPayServer.merchantCode = merchantId;
+                    updateAndSendPodcast(res, next, req.params.podcastID, req.body);
+                })
             }
-            if(req.body && req.body.price){
-                podcast.price = req.body.price;
+            else {
+                updateAndSendPodcast(res, next, req.params.podcastID, req.body);
             }
-            podcast.save();
-            res.send("OK");
-        })
+        }
+        else {
+            updateAndSendPodcast(res, next, req.params.podcastID, req.body);
+        }
     }
     else {
         res.status(401);
         res.send("Access denied");
     }
 });
+
+function updateAndSendPodcast(res, next, podcastId, podcastData) {
+    // Flatten nested data.
+    podcastData = flatten(podcastData);
+    db.Podcast.findByIdAndUpdate(podcastId, podcastData, function(err, podcast) {
+        if(err){
+            return next(err);
+        }
+        else if(podcast == null) {
+            res.status(404);
+            res.send("Not Found");
+        }
+        else {
+            res.send("OK");
+        }
+    }) 
+}
 
 /* DELETE podcast */
 router.delete('/podcast/:podcastID', function (req, res, next){
@@ -131,19 +156,7 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
                     res.json(enclosure);
                 }
                 else {
-                    // Create invoice
-                    btcpay.addInvoice(enclosure, function (err, invoice) {
-                        if (err) {
-                            err.status = 500;
-                            return next(err);
-                        }
-                        // Add to pending invoices
-                        invoice = new db.Invoice(invoice);
-                        invoice.save();
-                        sessionCtrl.addInvoice(req, invoice._id, req.params.enclosureID);
-                        // Return invoice info
-                        res.status(402).json(invoice);
-                    })
+                    returnNewInvoice(req, res, next, enclosure);
                 }
             })
         }
@@ -154,8 +167,14 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
                 }
                 btcpay.getInvoice(invoice.id, enclosure, function (err, invoice) {
                     if (err) {
-                        err.status = 500;
-                        return next(err);
+                        if(err.statusCode == 404) {
+                            sessionCtrl.removeInvoice(req, enclosure._id);
+                            returnNewInvoice(req, res, next, enclosure);
+                        }
+                        else {
+                            err.status = 500;
+                            return next(err);
+                        }
                     }
                     switch (invoice.status) {
                         case "complete":
@@ -167,20 +186,8 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
                         case "invalid":
                             // Remove existing invoice.
                             sessionCtrl.removeInvoice(req, enclosure._id);
-                            // Create new invoice.
-                            btcpay.addInvoice(enclosure, function (err, invoice) {
-                                if (err) {
-                                    err.status = 500;
-                                    return next(err);
-                                }
-                                // Add to pending invoices
-                                invoice = new db.Invoice(invoice);
-                                invoice.save();
-                                sessionCtrl.addInvoice(req, invoice._id, req.params.enclosureID);
-                                // Return invoice info
-                                response_data = invoice;
-                                res.json(response_data);
-                            });
+                            returnNewInvoice(req, res, next, enclosure);
+                            break;
                         default:
                             // Invoice is pending.
                             // Return pending invoice.
@@ -192,8 +199,23 @@ router.get('/enclosure/:enclosureID', function (req, res, next) {
             })
         }
     });
-
 });
+
+function returnNewInvoice(req, res, next, enclosure) {
+    // Create new invoice.
+    btcpay.addInvoice(enclosure, function (err, invoice) {
+        if (err) {
+            err.status = 500;
+            return next(err);
+        }
+        // Add to pending invoices
+        invoice = new db.Invoice(invoice);
+        invoice.save();
+        sessionCtrl.addInvoice(req, invoice._id, req.params.enclosureID);
+        // Return invoice info
+        res.status(402).json(invoice);
+    });
+}
 
 
 /* Add a podcast. */

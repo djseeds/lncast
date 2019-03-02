@@ -1,9 +1,12 @@
 var uniqueConcat = require('unique-concat');
+var db = require('./database');
 /* getSessionData returns the user object when user is logged in
  * and the session object when user is not logged in */
 var getSessionData = function(req){
     if(req.user){
-        return req.user;
+        db.User.findById(req.user._id, function(err, user) {
+            return user;
+        });
     }
     return req.session;
 }
@@ -39,7 +42,7 @@ module.exports.removeInvoice = function(req, enclosureID){
     data = getSessionData(req);
     for(var i = 0; i < data.invoices.length; i++){
         if(data.invoices[i].enclosure == enclosureID){
-            data.invoices[i].splice(i, 1);
+            data.invoices.splice(i, 1);
             break;
         }
     }

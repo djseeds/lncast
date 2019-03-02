@@ -1,6 +1,12 @@
 angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$rootScope', '$http', '$routeParams', '$timeout', function podcastController($scope, $rootScope, $http, $routeParams, $timeout) {
 
     $scope.pay_req_generated = false;
+    var timeout = null;
+    $scope.$on("$destroy", function(){
+        if(timeout != null) {
+            $timeout.cancel(timeout);
+        }
+    });
 
     $scope.pollEpisodeLink = function (repeat) {
         if (!$scope.episode.enclosure) {
@@ -18,7 +24,7 @@ angular.module('myApp').controller('EpisodeCtrl', ['$scope', '$rootScope', '$htt
                     $scope.invoice = error.data;
                     if (repeat) {
                         $scope.pay_req_generated = true;
-                        $timeout(pollEpisodeLink, 1000, true, false);
+                        timeout = $timeout($scope.pollEpisodeLink, 1000, false, true);
                     }
                 }
             });

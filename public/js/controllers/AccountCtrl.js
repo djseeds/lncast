@@ -12,32 +12,6 @@ angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', '$location
                 }
             });
 
-    $http.get('https://blockchain.info/ticker').then(
-            function(response){
-                $scope.btcPrice = response.data.USD.last;
-            },
-            function(error){
-            });
-    $scope.withdraw = function(){
-        $scope.invalidInvoice = false;
-        $scope.paymentFailed = false;
-        $http.post('/api/account/withdraw', data={payment_request: $scope.invoice}).then(
-                function(response){
-                    $scope.account.balance = response.data.balance;
-                    $scope.withdrawClicked = false;
-                },
-                function(error){
-                    if(error.status == 400){
-                        // Bad request
-                        $scope.invalidInvoice = true;
-                    }
-                     else if(error.status == 500){
-                        // Payment failed
-                        $scope.paymentFailed = true;
-                    }
-                })
-    };
-
     $scope.deleteAccount = function(podcast){
         if(confirm("Are you sure you want to delete your account?\nAll of your data (including podcasts) will be deleted.")){
             $http.delete('/api/account').then(
@@ -72,8 +46,8 @@ angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', '$location
         }
     };
     
-    $scope.update = function(podcast){
-        $http.post('/api/podcast/' + podcast._id, data={price: podcast.price}).then(
+    $scope.update = function(podcastId, update){
+        $http.post('/api/podcast/' + podcastId, data = update).then(
                 function(response){
                     $route.reload();
                 },

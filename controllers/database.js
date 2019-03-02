@@ -1,4 +1,3 @@
-var parsePodcast = require('node-podcast-parser');
 var FeedParser = require('feedparser');
 var request = require('request');
 var mongoose = require('mongoose');

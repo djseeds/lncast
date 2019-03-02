@@ -1,5 +1,4 @@
 var express = require('express');
-var crypto = require('crypto');
 var db = require('../controllers/database');
 var sessionCtrl = require('../controllers/session');
 var twitter = require('../controllers/twitter');

@@ -43,5 +43,9 @@
     "serve-favicon": "^2.5.0",
     "twitter": "^1.7.1",
     "unique-concat": "^0.2.2"
+  },
+  "devDependencies": {
+    "eslint": "^5.15.0",
+    "eslint-config-google": "^0.12.0"
   }
 }

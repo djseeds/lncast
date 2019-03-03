@@ -1,41 +1,42 @@
 #!/usr/bin/env node
-var app = require('../app');
-var debug = require('debug')('lncast:server');
-var https = require('https');
-var http = require('http');
-var fs = require('fs');
+const app = require('../app');
+const debug = require('debug')('lncast:server');
+const https = require('https');
+const http = require('http');
 
-//const credentials = {
+// const credentials = {
 //    key: fs.readFileSync(process.env.SSL_KEY),
 //    cert: fs.readFileSync(process.env.SSL_CERT)
-//}
+// }
 
-//var https_server = https.createServer(credentials, app);
-var http_server = http.createServer(app);
+// const https_server = https.createServer(credentials, app);
+const httpServer = http.createServer(app);
 // Redirect from http port 80 to https
-//http.createServer(function (req, res) {
+// http.createServer(function (req, res) {
 //        res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url  });
 //        res.end();
 //
 //        }).listen(80);
 
-//https_server.listen(443);
-//https_server.on('error', onError);
-//https_server.on('listening', onListening);
+// https_server.listen(443);
+// https_server.on('error', onError);
+// https_server.on('listening', onListening);
 
-http_server.listen(8080);
-http_server.on('error', onError);
-http_server.on('listening', onListening);
+httpServer.listen(8080);
+httpServer.on('error', onError);
+httpServer.on('listening', onListening);
 
 /**
  * Event listener for HTTP server "error" event.
+ *
+ * @param {*} error - Error object.
  */
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
 
-  var bind = typeof port === 'string'
+  const bind = typeof port === 'string'
     ? 'Pipe ' + port
     : 'Port ' + port;
 
@@ -57,10 +58,9 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
-  var addr = http_server.address();
-  var bind = typeof addr === 'string'
+  const addr = httpServer.address();
+  const bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);

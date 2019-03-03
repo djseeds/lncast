@@ -1,12 +1,8 @@
 const btcpay = require('btcpay');
-const key = process.env.BTCPAYSERVER_PRIVATE_KEY;
-if (key == null) {
-  throw new Error('BTCPAYSERVER_PRIVATE_KEY not defined.');
-}
-// eslint-disable-next-line new-cap
 
 module.exports.pairClient = function(btcpayUrl, pairCode, callback) {
   const privKey = btcpay.crypto.generate_keypair().getPrivate().toString();
+  // eslint-disable-next-line new-cap
   const keyPair = btcpay.crypto.load_keypair(new Buffer.from(privKey, 'hex'));
   new btcpay.BTCPayClient(btcpayUrl,
       keyPair)
@@ -55,7 +51,8 @@ module.exports.getInvoice = function(invoiceId, enclosure, callback) {
 const getBtcPayClient = function(podcast) {
   const serverInfo = podcast.btcPayServer;
   const keyPair = btcpay.crypto.load_keypair(
-    new Buffer.from(serverInfo.privateKey, 'hex'));
+      // eslint-disable-next-line new-cap
+      new Buffer.from(serverInfo.privateKey, 'hex'));
   return new btcpay.BTCPayClient(
       serverInfo.serverUrl,
       keyPair,

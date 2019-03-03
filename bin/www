@@ -1,35 +1,59 @@
 #!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
 const app = require('../app');
 const debug = require('debug')('lncast:server');
 const https = require('https');
 const http = require('http');
+const fs = require('fs');
 
-// const credentials = {
-//    key: fs.readFileSync(process.env.SSL_KEY),
-//    cert: fs.readFileSync(process.env.SSL_CERT)
-// }
+/**
+ * Get port from environment and store in Express.
+ */
 
-// const https_server = https.createServer(credentials, app);
-const httpServer = http.createServer(app);
-// Redirect from http port 80 to https
-// http.createServer(function (req, res) {
-//        res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url  });
-//        res.end();
-//
-//        }).listen(80);
+/**
+ * Create HTTPS server.
+ */
 
-// https_server.listen(443);
-// https_server.on('error', onError);
-// https_server.on('listening', onListening);
+let httpServer;
 
-httpServer.listen(8080);
+if (process.env.LNCAST_REDIRECT_HTTP) {
+  // Redirect from http port 80 to https
+  httpServer = http.createServer(function(req, res) {
+    res.writeHead(301, {'Location': 'https://' + req.headers['host'] + ':' + getHttpsPort() + req.url});
+    res.end();
+  });
+} else {
+  httpServer = http.createServer(app);
+}
+
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+httpServer.listen(getHttpPort());
 httpServer.on('error', onError);
 httpServer.on('listening', onListening);
+
+if (process.env.LNCAST_ENABLE_HTTPS) {
+  const credentials = {
+    key: fs.readFileSync(process.env.LNCAST_SSL_KEY),
+    cert: fs.readFileSync(process.env.LNCAST_SSL_CERT),
+  };
+
+  const httpsServer = https.createServer(credentials, app);
+  httpsServer.listen(getHttpsPort());
+  httpsServer.on('error', onError);
+  httpsServer.on('listening', onListening);
+}
 
 /**
  * Event listener for HTTP server "error" event.
  *
- * @param {*} error - Error object.
+ * @param {*} error
  */
 function onError(error) {
   if (error.syscall !== 'listen') {
@@ -64,4 +88,23 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+/**
+ * Gets HTTP port from environmental variables.
+ *
+ * @return {Number} a port number
+ */
+function getHttpPort() {
+  const port = process.env.LNCAST_HTTP_PORT;
+  return port ? Number(port) : 80;
+}
+
+/**
+ * Gets HTTPS port from environmental variables.
+ *
+ * @return {Number} a port number
+ */
+function getHttpsPort() {
+  const port = process.env.LNCAST_HTTPS_PORT;
+  return port ? Number(port) : 443;
 }

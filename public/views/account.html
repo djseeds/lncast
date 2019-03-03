@@ -3,6 +3,13 @@
 <div class="jumbotron text-center">
     <h1>My Account</h1>
 </div>
+<div class="sticky-top" ng-repeat="alert in alerts">
+    <div class="alert alert-{{alert.type}} alert-dismissible" close="closeAlert($index)">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{alert.message}}
+    </div>
+</div>
+</div>
 <div class="card m-2">
     <div class="card-block m-2">
         <h4 class="card-title">Account Info</h4>
@@ -13,73 +20,80 @@
 <div class="card m-2">
     <div class="card-block m-2">
         <h4 class="card-title">My Podcasts</h4>
-        <div class="card" ng-repeat="podcast in account.owns">
+        <div class="card m-2" ng-repeat="podcast in account.owns">
             <h5 class="card-title m-2">
                 {{podcast.title}}
             </h5>
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs">
                     <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" data-target="#price">Price</a>
+                        <a class="nav-link active" data-toggle="tab" data-target="#price{{$index}}">Price</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" data-target="#btcpayserver">BTCPayServer Info</a>
+                        <a class="nav-link" data-toggle="tab" data-target="#btcpayserver{{$index}}">BTCPayServer
+                            Info</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" data-target="#nodeinfo">Lightning Node Status</a>
+                        <a class="nav-link" data-toggle="tab" data-target="#nodeinfo{{$index}}">Lightning Node
+                            Status</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" data-target="#delete">Danger Zone</a>
+                        <a class="nav-link" data-toggle="tab" data-target="#danger{{$index}}">Danger Zone</a>
                     </li>
                 </ul>
             </div>
             <div class="card-block m-2">
                 <div class="tab-content">
-                    <div id="price" class="tab-pane active">
-                        <form ng-submit="update(podcast._id, {price: podcast.price})">
+                    <div id="price{{$index}}" class="tab-pane active">
+                        <form ng-submit="updatePrice(podcast)">
                             <div class="form-group">
-                                <label for="price{{$index}}">Price Per Episode</label>
+                                <label for="podcast.price{{$index}}">Price Per Episode</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">t$</span>
                                     </div>
-                                    <input type="number" step="any" min="0" name="price" class="form-control" id="price{{$index}}"
-                                        ng-model="podcast.price" required="true">
+                                    <input type="number" step="any" min="0" name="price" class="form-control"
+                                        id="podcast.price{{$index}}" ng-model="podcast.price" required="true">
                                 </div>
                             </div>
                             <input type="submit" value="Update Price" class="btn btn-primary">
                         </form>
                     </div>
-                    <div id="btcpayserver" class="tab-pane">
-                        <form ng-submit="update(podcast._id, {btcPayServer:{serverUrl: podcast.btcPayServer.serverUrl, pairCode: podcast.btcPayServer.pairCode}})">
+                    <div id="btcpayserver{{$index}}" class="tab-pane">
+                        <form ng-submit="pairBtcPay(podcast)">
                             <div class="form-group">
                                 <div class="form-group">
                                     <label for="serverUrl{{$index}}">BTCPayServer URL</label>
-                                    <input class="form-control" required="required" name="serverUrl{{$index}}" ng-model="podcast.btcPayServer.serverUrl"
-                                        type="url" autofocus=""></input>
+                                    <input class="form-control" required="required" name="serverUrl{{$index}}"
+                                        ng-model="podcast.btcPayServer.serverUrl" type="url" autofocus=""></input>
                                 </div>
                                 <div class="form-group">
                                     <label for="btcPayServer.pairCode">BTCPayServer Pairing Code</label>
-                                    <input class="form-control" required="required" placeholder="abcd123" name="btcPayServer.pairCode"
-                                        ng-model="podcast.btcPayServer.pairCode" type="string" autofocus=""></input>
+                                    <input class="form-control" required="required" placeholder="abcd123"
+                                        name="btcPayServer.pairCode" ng-model="podcast.btcPayServer.pairCode"
+                                        type="string" autofocus=""></input>
                                 </div>
                             </div>
                             <input type="submit" value="Update BTCPayServer Info" class="btn btn-primary">
                         </form>
                     </div>
-                    <div id="nodeinfo" class="tab-pane">
-                        <form ng-submit="update(podcast._id, {btcPayServer:{storeId: podcast.btcPayServer.storeId}})">
+                    <div id="nodeinfo{{$index}}" class="tab-pane">
+                        <form ng-submit="updateStoreId(podcast)">
                             <div class="form-group">
                                 <label for="btcPayServer.storeId">BTCPayServer Store Id</label>
-                                <input class="form-control" required="required" name="btcPayServer.storeId" placeholder="7154GQDkwVPfEnh7gx5VjagMWmZZ3v3AGd3qGace8GSV"
+                                <input class="form-control" required="required" name="btcPayServer.storeId"
+                                    placeholder="7154GQDkwVPfEnh7gx5VjagMWmZZ3v3AGd3qGace8GSV"
                                     ng-model="podcast.btcPayServer.storeId" type="string" autofocus=""></input>
                             </div>
                             <input type="submit" value="Update BTCPayServer Info" class="btn btn-primary">
                         </form>
-                        <iframe height="500" width="400" src="{{podcast.btcPayServer.nodeInfoUrl | trusted}}"></iframe>
+                        <iframe height="500" width="400"
+                            ng-src="{{(podcast.btcPayServer.serverUrl + '/embed/' + podcast.btcPayServer.storeId + '/BTC/ln') | trusted}}"></iframe>
                     </div>
-                    <div id="delete" class="tab-pane">
-                        <button class="btn btn-danger" ng-click="deletePodcast(podcast)">Delete Podcast</button>
+                    <div id="danger{{$index}}" class="tab-pane">
+                        <form>
+                            <button class="btn btn-danger" ng-click="deletePodcast(podcast)">Delete Podcast</button>
+                        </form>
                     </div>
                 </div>
             </div>

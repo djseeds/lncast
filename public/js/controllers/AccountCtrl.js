@@ -46,18 +46,78 @@ angular.module('myApp').controller('AccountCtrl', ['$scope', '$http', '$location
         }
     };
     
-    $scope.update = function(podcastId, update){
+    $scope.update = function (podcastId, update, callback) {
         $http.post('/api/podcast/' + podcastId, data = update).then(
-                function(response){
-                    $route.reload();
-                },
-                function(error){
-                    if(error.status == 400){
-                        // Bad request
-                    }
-                    else if(error.status == 500){
-                        // Update failed
-                    }
-                })
+            function (response) {
+                callback(null, response.data);
+            },
+            function (error) {
+                callback(error);
+            })
     };
+
+    $scope.addAlert = function (type, message) {
+        alert = {type: type, message: message};
+        if(!$scope.alerts) {
+            $scope.alerts = [alert];
+        }
+        else {
+            $scope.alerts.push(alert);
+        }
+    }
+
+    $scope.dismissAlert = function (index) {
+        if($scope.alerts) {
+            array.splice(index, 1);
+        }
+    }
+
+    $scope.pairBtcPay = function (podcastData) {
+        $scope.update(podcastData._id,
+            {
+                btcPayServer: {
+                    serverUrl: podcastData.btcPayServer.serverUrl,
+                    pairCode: podcastData.btcPayServer.pairCode
+                }
+            },
+            function(err, podcast) {
+                if(err) {
+                    $scope.addAlert("danger", "Failed to pair with BTCPayServer. Please check your values and try again.");
+                }
+                else {
+                    $scope.addAlert("success", "Successfully paired with BTCPayServer.");
+                }
+            }
+        )
+    }
+
+    $scope.updatePrice = function (podcastData) {
+        $scope.update(podcastData._id, { price: podcastData.price }, function(err, podcast) {
+                if(err) {
+                    $scope.addAlert("danger", "Failed to update price. Please check your values and try again.");
+                }
+                else {
+                    $scope.addAlert("success", "Successfully updated price.");
+                }
+            }
+        )
+    }
+
+    $scope.updateStoreId = function (podcastData) {
+        $scope.update(podcastData._id,
+            {
+                btcPayServer: {
+                    storeId: podcastData.btcPayServer.storeId
+                }
+            },
+            function(err, podcast) {
+                if(err) {
+                    $scope.addAlert("danger", "Failed to update store ID. Please check your values and try again.");
+                }
+                else {
+                    $scope.addAlert("success", "Successfully updated store ID.");
+                }
+            }
+        )
+    }
 }]);

@@ -193,6 +193,7 @@ const PodcastSchema = new Schema({
     serverUrl: {type: String, required: true},
     storeId: {type: String, required: true},
     merchantCode: {type: String, required: true},
+    privateKey: {type: String, required: true},
   },
 },
 {

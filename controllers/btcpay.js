@@ -4,14 +4,15 @@ if (key == null) {
   throw new Error('BTCPAYSERVER_PRIVATE_KEY not defined.');
 }
 // eslint-disable-next-line new-cap
-const keypair = btcpay.crypto.load_keypair(new Buffer.from(key, 'hex'));
 
 module.exports.pairClient = function(btcpayUrl, pairCode, callback) {
+  const privKey = btcpay.crypto.generate_keypair().getPrivate().toString();
+  const keyPair = btcpay.crypto.load_keypair(new Buffer.from(privKey, 'hex'));
   new btcpay.BTCPayClient(btcpayUrl,
-      keypair)
+      keyPair)
       .pair_client(pairCode)
       .then(function(res) {
-        callback(null, res.merchant);
+        callback(null, res.merchant, privKey);
       })
       .catch(function(err) {
         callback(err);
@@ -53,9 +54,11 @@ module.exports.getInvoice = function(invoiceId, enclosure, callback) {
 
 const getBtcPayClient = function(podcast) {
   const serverInfo = podcast.btcPayServer;
+  const keyPair = btcpay.crypto.load_keypair(
+    new Buffer.from(serverInfo.privateKey, 'hex'));
   return new btcpay.BTCPayClient(
       serverInfo.serverUrl,
-      keypair,
+      keyPair,
       {merchant: serverInfo.merchantCode});
 }
   ;

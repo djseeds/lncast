@@ -53,12 +53,14 @@ router.post('/podcast/:podcastID', function(req, res, next) {
       } else if (req.body.btcPayServer.serverUrl
         && req.body.btcPayServer.pairCode) {
         btcpay.pairClient(req.body.btcPayServer.serverUrl,
-            req.body.btcPayServer.pairCode, function(err, merchantId) {
+            req.body.btcPayServer.pairCode,
+            function(err, merchantId, privateKey) {
               if (err) {
                 return next(err);
               }
               // Update merchant ID.
               req.body.btcPayServer.merchantCode = merchantId;
+              req.body.btcPayServer.privateKey = privateKey;
               updateAndSendPodcast(res, next, req.params.podcastID, req.body);
             });
       } else {
@@ -173,24 +175,25 @@ router.get('/enclosure/:enclosureID', function(req, res, next) {
               err.status = 500;
               return next(err);
             }
-          }
-          switch (invoice.status) {
-            case 'complete':
-              // Enclosure has been paid for, so return it.
-              enclosure.listen();
-              res.json(enclosure);
-              break;
-            case 'expired':
-            case 'invalid':
-              // Remove existing invoice.
-              sessionCtrl.removeInvoice(req, enclosure._id);
-              returnNewInvoice(req, res, next, enclosure);
-              break;
-            default:
-              // Invoice is pending.
-              // Return pending invoice.
-              res.status(402).json(invoice);
-              break;
+          } else {
+            switch (invoice.status) {
+              case 'complete':
+                // Enclosure has been paid for, so return it.
+                enclosure.listen();
+                res.json(enclosure);
+                break;
+              case 'expired':
+              case 'invalid':
+                // Remove existing invoice.
+                sessionCtrl.removeInvoice(req, enclosure._id);
+                returnNewInvoice(req, res, next, enclosure);
+                break;
+              default:
+                // Invoice is pending.
+                // Return pending invoice.
+                res.status(402).json(invoice);
+                break;
+            }
           }
         });
       });
@@ -236,7 +239,7 @@ router.post('/add', function(req, res, next) {
       return next(err);
     }
     btcpay.pairClient(req.body.btcPayServer.url,
-        req.body.btcPayServer.pairCode, function(err, merchantId) {
+        req.body.btcPayServer.pairCode, function(err, merchantId, privateKey) {
           if (err) {
             return next(err);
           }
@@ -244,6 +247,7 @@ router.post('/add', function(req, res, next) {
             serverUrl: req.body.btcPayServer.url,
             storeId: req.body.btcPayServer.storeId,
             merchantCode: merchantId,
+            privateKey: privateKey,
           };
           db.addPodcast(req.body.feed, req.body.price, btcPayServerInfo,
               function(err, podcast) {

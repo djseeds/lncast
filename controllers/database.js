@@ -16,14 +16,10 @@ const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-
 const EpisodeSchema = new Schema({
   title: {type: String, required: true},
   description: {type: String},
   summary: {type: String},
-  link: {type: String},
-  origlink: {type: String},
-  permalink: {type: String},
   date: {type: Date},
   pubdate: {type: Date},
   author: {type: String},
@@ -31,7 +27,6 @@ const EpisodeSchema = new Schema({
   comments: {type: String},
   image: {url: {type: String}, title: {type: String}},
   categories: [{type: String}],
-  source: {url: {type: String}, title: {type: String}},
   enclosure: {type: Schema.ObjectId, ref: 'Enclosure'},
   earned: {type: Number, default: 0},
   listens: {type: Number, default: 0},
@@ -40,6 +35,15 @@ const EpisodeSchema = new Schema({
   toJSON: {virtuals: true},
   toObject: {virtuals: true},
 });
+
+EpisodeSchema.methods.toJSON = function() {
+  const obj = this.toObject({getters: true});
+
+  // Remove fields that could leak info
+  delete obj.guid;
+
+  return obj;
+};
 
 EpisodeSchema.methods.getPrice = function(callback) {
   Podcast.findOne({'episodes': this._id}, function(err, podcast) {
@@ -187,8 +191,6 @@ const PodcastSchema = new Schema({
   price: {type: Number},
   earned: {type: Number, default: 0},
   listens: {type: Number, default: 0},
-  // TODO: Find another way to send this.
-  subscribed: {type: Boolean, default: false},
   btcPayServer: {
     serverUrl: {type: String, required: true},
     storeId: {type: String, required: true},
@@ -199,6 +201,18 @@ const PodcastSchema = new Schema({
 {
   toJSON: {virtuals: true},
 });
+
+PodcastSchema.methods.toJSON = function() {
+  const obj = this.toObject({getters: true});
+
+  // Remove fields that could leak info
+  delete obj.link;
+  delete obj.xmlurl;
+  delete obj.btcPayServer.privateKey;
+  delete obj.btcPayServer.merchantCode;
+
+  return obj;
+};
 
 PodcastSchema.virtual('url').get(function() {
   return '/podcast/' + this._id;
@@ -261,9 +275,6 @@ const UserSchema = new Schema({
   }],
   owns: [{type: Schema.ObjectId, ref: 'Podcast'}],
   subscriptions: [{type: Schema.ObjectId, ref: 'Podcast'}],
-  pubkey: String,
-  address: String,
-  balance: {type: Number, default: 0},
 });
 
 UserSchema.methods.withdraw = function(value, callback) {

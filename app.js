@@ -58,7 +58,7 @@ app.use('*', httpsRedirect());
 app.use('/api', podcasts);
 app.use('/api/account', account);
 
-app.post('/register', function(req, res, next) {
+app.post('/api/account/register', function(req, res, next) {
   db.User.register(new db.User({username: req.body.username}),
       req.body.password, function(err, account) {
         if (err) {
@@ -72,12 +72,13 @@ app.post('/register', function(req, res, next) {
       });
 });
 
-app.post('/login', passport.authenticate('local'), function(req, res) {
-  sessionCtrl.synchronizeSession(req);
-  res.redirect('/');
-});
+app.post('/api/account/login', passport.authenticate('local'),
+    function(req, res) {
+      sessionCtrl.synchronizeSession(req);
+      res.redirect('/');
+    });
 
-app.post('/logout', function(req, res) {
+app.post('/api/account/logout', function(req, res) {
   sessionCtrl.resetSession(req);
   req.logout();
   res.redirect('/');

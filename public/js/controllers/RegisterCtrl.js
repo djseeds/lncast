@@ -3,7 +3,7 @@ angular.module('myApp').controller('RegisterCtrl',
       function loginController($rootScope, $scope, $http, $location) {
         $scope.registerFailed = false;
         $scope.submit = function() {
-          $http.post('/register', {
+          $http.post('/api/account/register', {
             username: $scope.username,
             password: $scope.password,
           }).then(

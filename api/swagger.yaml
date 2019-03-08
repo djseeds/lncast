@@ -330,7 +330,7 @@ paths:
           description: Access denied - User is not logged in
         '500':
           description: Internal server error
-  /register:
+  /account/register:
     post:
       tags:
         - user
@@ -345,7 +345,7 @@ paths:
             $ref: "#/definitions/User"
         '500':
           description: Internal server error
-  /login:
+  /account/login:
     post:
       tags:
         - user
@@ -360,7 +360,7 @@ paths:
             $ref: "#/definitions/User"
         '500':
           description: Internal server error
-  /logout:
+  /account/logout:
     post:
       tags:
         - user

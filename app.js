@@ -62,7 +62,6 @@ app.post('/register', function(req, res, next) {
   db.User.register(new db.User({username: req.body.username}),
       req.body.password, function(err, account) {
         if (err) {
-          console.log('Fail');
           console.log(err);
           return next(err);
         }

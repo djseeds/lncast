@@ -36,16 +36,25 @@ angular.module('myApp').controller('EpisodeCtrl',
         $http.get('/api/podcast/' + $routeParams.podcastID
         + '/' + $routeParams.episodeID).then(
             function(response) {
-              $scope.episode = response.data.episode;
-              $scope.podcast = response.data.podcast;
+              $scope.episode = response.data;
               $rootScope.meta = {
                 title: $scope.episode.title,
                 description: $scope.episode.description,
-                image: $scope.podcast.image.url,
               };
               $scope.episode.unlocked = false;
               // Check if we have enclosure or not.
               $scope.pollEpisodeLink(false);
+            },
+            function(error) {
+              console.log(error.data);
+            });
+
+        $http.get('/api/podcast/' + $routeParams.podcastID)
+            .then(function(response) {
+              $scope.podcast = response.data;
+              $rootScope.meta = {
+                image: $scope.podcast.image.url,
+              };
             },
             function(error) {
               console.log(error.data);

@@ -27,6 +27,9 @@ router.get('/podcast/:podcastID', function(req, res, next) {
         if (err) {
           next(err);
         } else {
+          if (!podcast) {
+            res.status(404).send('Podcast not found.');
+          }
           // If user is logged in, check if they are subscribed
           if (req.user) {
             console.log('IsSubscribed');
@@ -105,12 +108,16 @@ router.delete('/podcast/:podcastID', function(req, res, next) {
     return id.toString() == req.params.podcastID;
   }) != -1) {
     console.log('Deleting');
-    db.Podcast.removeById(req.params.podcastID, function(err) {
+    db.Podcast.removeById(req.params.podcastID, function(err, podcast) {
       if (err) {
         console.log(err);
         return next(err);
+      } else if (podcast == null) {
+        res.status(404);
+        res.send('Not Found');
+      } else {
+        res.send('OK');
       }
-      res.send('OK');
     });
   } else {
     res.status(401);
@@ -130,10 +137,7 @@ router.get('/podcast/:podcastID/:episodeID', function(req, res, next) {
                 if (err) {
                   next(err);
                 } else {
-                  res.json({
-                    episode: episode,
-                    podcast: podcast,
-                  });
+                  res.json(episode);
                 }
               });
         }
@@ -238,13 +242,13 @@ router.post('/add', function(req, res, next) {
       err.status = 400;
       return next(err);
     }
-    btcpay.pairClient(req.body.btcPayServer.url,
+    btcpay.pairClient(req.body.btcPayServer.serverUrl,
         req.body.btcPayServer.pairCode, function(err, merchantId, privateKey) {
           if (err) {
             return next(err);
           }
           const btcPayServerInfo = {
-            serverUrl: req.body.btcPayServer.url,
+            serverUrl: req.body.btcPayServer.serverUrl,
             storeId: req.body.btcPayServer.storeId,
             merchantCode: merchantId,
             privateKey: privateKey,

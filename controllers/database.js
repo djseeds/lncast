@@ -246,8 +246,11 @@ PodcastSchema.statics.removeById = function(podcastID, callback) {
     if (err) {
       callback(err);
       return;
+    } else if (!podcast) {
+      callback();
+    } else {
+      podcast.remove(callback);
     }
-    podcast.remove();
   });
 };
 

@@ -10,23 +10,22 @@
                         <div class="form-group">
                             <label for="feed">RSS Feed</label>
                             <input class="form-control" required="required" placeholder="http://www.feedforall.com/sample.xml" name="feed" ng-model="feed" type="url" autofocus=""> </input>
-                            <small class="form-text">
-                                <div class="alert alert-danger" ng-show="addFailed == true" ng-init="addFailed = false">
-                                    <strong>Failed to add podcast.</strong> Please check your RSS feed and try again.
-                                </div>
-                            </small>
+                            <small id="serverUrlHelp" class="help-block">Your Podcasts's RSS Feed</small>
                         </div>
                         <div class="form-group">
-                            <label for="btcPayServer.serverUrl">BTCPayServer URL</label>
+                            <label for="btcPayServer.serverUrl">BTCPay Server URL</label>
                             <input class="form-control" required="required" placeholder="https://testnet.demo.btcpayserver.org" name="btcPayServer.serverUrl" ng-model="btcPayServer.serverUrl" type="url" autofocus=""></input>
+                            <small id="serverUrlHelp" class="help-block">Public URL of your BTCPay Server instance</small>
                         </div>
                         <div class="form-group">
-                            <label for="btcPayServer.storeId">BTCPayServer Store Id</label>
+                            <label for="btcPayServer.storeId">BTCPay Store Id</label>
                             <input class="form-control" required="required" placeholder="7154GQDkwVPfEnh7gx5VjagMWmZZ3v3AGd3qGace8GSV" name="btcPayServer.storeId" ng-model="btcPayServer.storeId" type="string" autofocus=""></input>
+                            <small id="storeIdHelp" class="help-block">Id found in General Settings of your BTCPay Store</small>
                         </div>
                         <div class="form-group">
-                            <label for="btcPayServer.pairCode">BTCPayServer Pairing Code</label>
+                            <label for="btcPayServer.pairCode">BTCPay Pairing Code</label>
                             <input class="form-control" required="required" placeholder="abcd123" name="btcPayServer.pairCode" ng-model="btcPayServer.pairCode" type="string" autofocus=""></input>
+                            <small id="storeIdHelp" class="help-block">Merchant Pairing Code from creating an access token in your BTCPay Store</small>
                         </div>
                         <div class="form-group">
                             <label for="price">Per-Episode Price</label>
@@ -39,10 +38,15 @@
                         </div>
                             <div class="checkbox">
                                 <label>
-                                    <input name="remember" required="required" type="checkbox">I am the creator of this podcast or have permission from the creator of this podcast.</input>
+                                    <input name="remember" required="required" type="checkbox"> I am the creator of this podcast or have permission from the creator of this podcast.</input>
                                 </label>
                         </div>
                         <button type="submit" class="btn btn-default">Submit</button>
+                        <small class="form-text">
+                            <div class="alert alert-danger" ng-show="addFailed == true" ng-init="addFailed = false">
+                                <strong>Failed to add podcast.</strong> Please check your RSS feed and try again.
+                            </div>
+                        </small>
                     </fieldset>
                 </form>
             </div>

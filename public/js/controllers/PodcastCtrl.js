@@ -5,6 +5,10 @@ angular.module('myApp').controller('PodcastCtrl',
         $http.get('/api/podcast/' + $routeParams.podcastID).then(
             function(response) {
               $scope.podcast = response.data;
+              $scope.podcast.episodes.map(function(episode) {
+                episode.date = (new Date(episode.date)).toLocaleDateString();
+                return episode;
+              });
               $rootScope.meta = {
                 title: response.data.title,
                 description: response.data.description,

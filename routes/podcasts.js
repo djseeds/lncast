@@ -47,7 +47,20 @@ router.post('/podcast/:podcastID', function(req, res, next) {
   if (req.isAuthenticated() && req.user.owns.findIndex(function(id) {
     return id.toString() == req.params.podcastID;
   }) != -1) {
+    // Prevent user from setting values they shouldn't be able to set.
+    req.body = {
+      btcPayServer: req.body.btcPayServer,
+      price: req.body.price,
+    };
+    req.body.btcPayServer = req.body.btcPayServer
+    ? {
+      serverUrl: req.body.btcPayServer.serverUrl,
+      pairCode: req.body.btcPayServer.pairCode,
+      storeId: req.body.btcPayServer.storeId,
+    }
+    : null;
     if (req.body.btcPayServer) {
+      // Check if only one of {serverUrl, pairCode} is set.
       if ((req.body.btcPayServer.serverUrl == null)
                 != (req.body.btcPayServer.pairCode == null)) {
         return next(

@@ -42,8 +42,11 @@
     "prerender-node": "^3.2.1",
     "request": "^2.88.0",
     "serve-favicon": "^2.5.0",
+    "swagger-express-middleware": "^2.0.1",
+    "swagger-ui-express": "^4.0.2",
     "twitter": "^1.7.1",
-    "unique-concat": "^0.2.2"
+    "unique-concat": "^0.2.2",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "eslint": "^5.15.0",

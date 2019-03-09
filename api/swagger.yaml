@@ -45,7 +45,8 @@ paths:
       parameters:
         - in: path
           name: podcastId
-          type: integer
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
           required: true
           description: ID of the podcast to get
       responses:
@@ -69,9 +70,10 @@ paths:
       parameters:
         - in: path
           name: podcastId
-          type: integer
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
           required: true
-          description: ID of the podcast to update
+          description: ID of the podcast to get
         - in: body
           name: podcast
           description: Updates a podcast
@@ -112,9 +114,10 @@ paths:
       parameters:
         - in: path
           name: podcastId
-          type: integer
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
           required: true
-          description: ID of the podcast to delete
+          description: ID of the podcast to get
       responses:
         '200':
           description: Podcast deleted
@@ -135,12 +138,14 @@ paths:
       parameters:
         - in: path
           name: podcastId
-          type: integer
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
           required: true
-          description: ID of the podcast to which the episode belongs
+          description: ID of the podcast to get
         - in: path
           name: episodeId
-          type: integer
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
           required: true
           description: ID of the episode to get
       responses:
@@ -166,7 +171,8 @@ paths:
       parameters:
         - in: path
           name: enclosureId
-          type: integer
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
           required: true
           description: ID of the enclosure to get
       responses:
@@ -336,8 +342,20 @@ paths:
         - user
       summary: Register new user
       operationId: registerUser
+      consumes:
+        - application/json
       produces:
         - application/json
+      parameters:
+        - in: body
+          description: User information
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
       responses:
         '200':
           description: User's account info
@@ -349,10 +367,22 @@ paths:
     post:
       tags:
         - user
-      summary: Register new user
+      summary: Login to existing user account
       operationId: login
+      consumes:
+        - application/json
       produces:
         - application/json
+      parameters:
+        - in: body
+          description: User information
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
       responses:
         '200':
           description: User's account info
@@ -364,7 +394,7 @@ paths:
     post:
       tags:
         - user
-      summary: Register new user
+      summary: Logout of user session
       operationId: logout
       produces:
         - application/json

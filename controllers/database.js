@@ -191,6 +191,7 @@ const PodcastSchema = new Schema({
   price: {type: Number},
   earned: {type: Number, default: 0},
   listens: {type: Number, default: 0},
+  subscribed: {type: Boolean, default: false},
   btcPayServer: {
     serverUrl: {type: String, required: true},
     storeId: {type: String, required: true},

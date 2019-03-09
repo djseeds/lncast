@@ -169,6 +169,7 @@ const InvoiceSchema = new Schema({
   addresses: {
     BTC_LightningLike: {type: String, required: true},
   },
+  complete: {type: Boolean, default: false},
 });
 
 const Invoice = mongoose.model('Invoice', InvoiceSchema, 'Invoice');

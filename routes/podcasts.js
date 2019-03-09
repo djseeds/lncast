@@ -179,11 +179,17 @@ router.get('/enclosure/:enclosureID', function(req, res, next) {
         }
       });
     } else {
-      db.Invoice.findById(invoiceId).exec(function(err, invoice) {
+      db.Invoice.findById(invoiceId).exec(function(err, dbInvoice) {
         if (err) {
           return next(err);
         }
-        btcpay.getInvoice(invoice.id, enclosure, function(err, invoice) {
+        // Don't query btcpayserver if we know user has paid.
+        if (dbInvoice.complete) {
+          enclosure.listen();
+          res.json(enclosure);
+          return;
+        }
+        btcpay.getInvoice(dbInvoice.id, enclosure, function(err, invoice) {
           if (err) {
             if (err.statusCode == 404) {
               sessionCtrl.removeInvoice(req, enclosure._id);
@@ -196,8 +202,11 @@ router.get('/enclosure/:enclosureID', function(req, res, next) {
             switch (invoice.status) {
               case 'complete':
                 // Enclosure has been paid for, so return it.
-                enclosure.listen();
                 res.json(enclosure);
+                enclosure.listen();
+                enclosure.credit(price);
+                dbInvoice.complete = true;
+                dbInvoice.save();
                 break;
               case 'expired':
               case 'invalid':

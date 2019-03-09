@@ -146,6 +146,15 @@ EnclosureSchema.methods.credit = function(value) {
   });
 };
 
+EnclosureSchema.methods.buy = function() {
+  const self = this;
+  this.getPrice( function(err, price) {
+    if (price) {
+      self.credit(price);
+    }
+  });
+};
+
 EnclosureSchema.methods.listen = function() {
   Episode.findOne({'enclosure': this._id}, function(err, episode) {
     if (err) {
@@ -194,10 +203,13 @@ const PodcastSchema = new Schema({
   listens: {type: Number, default: 0},
   subscribed: {type: Boolean, default: false},
   btcPayServer: {
-    serverUrl: {type: String, required: true},
-    storeId: {type: String, required: true},
-    merchantCode: {type: String, required: true},
-    privateKey: {type: String, required: true},
+    type: {
+      serverUrl: {type: String, required: true},
+      storeId: {type: String, required: true},
+      merchantCode: {type: String, required: true},
+      privateKey: {type: String, required: true},
+    },
+    required: true,
   },
 },
 {

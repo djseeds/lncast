@@ -48,17 +48,20 @@ router.post('/podcast/:podcastID', function(req, res, next) {
     return id.toString() == req.params.podcastID;
   }) != -1) {
     // Prevent user from setting values they shouldn't be able to set.
-    req.body = {
-      btcPayServer: req.body.btcPayServer,
-      price: req.body.price,
-    };
-    req.body.btcPayServer = req.body.btcPayServer
-    ? {
-      serverUrl: req.body.btcPayServer.serverUrl,
-      pairCode: req.body.btcPayServer.pairCode,
-      storeId: req.body.btcPayServer.storeId,
+    const allowedProps = ['price', 'btcPayServer'];
+    for (const k in req.body) {
+      if (allowedProps.indexOf(k) < 0) {
+        delete req.body[k];
+      }
     }
-    : null;
+    if (req.body.btcPayServer) {
+      const allowedProps = ['serverUrl', 'paircode', 'storeId'];
+      for (const k in req.body.btcPayServer) {
+        if (allowedProps.indexOf(k) < 0) {
+          delete req.body[k];
+        }
+      }
+    }
     if (req.body.btcPayServer) {
       // Check if only one of {serverUrl, pairCode} is set.
       if ((req.body.btcPayServer.serverUrl == null)
@@ -204,7 +207,7 @@ router.get('/enclosure/:enclosureID', function(req, res, next) {
                 // Enclosure has been paid for, so return it.
                 res.json(enclosure);
                 enclosure.listen();
-                enclosure.credit(price);
+                enclosure.buy();
                 dbInvoice.complete = true;
                 dbInvoice.save();
                 break;

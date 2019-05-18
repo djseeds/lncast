@@ -41,7 +41,12 @@
         <script src="/node_modules/qrcode-generator/qrcode_UTF8.js"></script>
         <script src="/node_modules/angular-qrcode/angular-qrcode.js"></script>
         <script src="/node_modules/ngclipboard/dist/ngclipboard.min.js"></script>
-
+        <style type="text/css">
+            #error-container {
+                margin-top: 10px;
+                position: fixed;
+            }
+        </style>
     </head>
 
     <!-- Navigation bar setup -->
@@ -51,8 +56,9 @@
         </button>
         <a class="navbar-brand" href="#!">LNCast ⚡  Lightning Network Podcasts</a>
         <form class="form-inline">
-            <a target="_blank" href="https://github.com/djseeds/lncast"><i class="fa fa-github m-2" aria-hidden="true"></i></a>
-            <a target="_blank" href="https://twitter.com/LNPodcasts"><i class="fa fa-twitter m-2" aria-hidden="true"></i></a>
+            <a target="_blank" href="/api-docs" class="m-1">API</a>
+            <a target="_blank" href="https://github.com/djseeds/lncast"><i class="fa fa-github m-1" aria-hidden="true"></i></a>
+            <a target="_blank" href="https://twitter.com/LNPodcasts"><i class="fa fa-twitter m-1" aria-hidden="true"></i></a>
         </form>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">

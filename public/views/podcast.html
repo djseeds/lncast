@@ -9,8 +9,10 @@
             <h1>{{podcast.title}}</h1>
             <p ng-bind-html="podcast.description"></p>
             <!-- Subscribe Button -->
-            <button class="btn btn-primary" ng-click="subscribe(podcast)" ng-if="podcast.subscribed == false">Subscribe</button>
-            <button class="btn btn-primary" ng-click="unsubscribe(podcast)" ng-if="podcast.subscribed == true">Unsubscribe</button>
+            <button class="btn btn-primary" ng-click="subscribe(podcast)"
+                ng-if="podcast.subscribed == false">Subscribe</button>
+            <button class="btn btn-primary" ng-click="unsubscribe(podcast)"
+                ng-if="podcast.subscribed == true">Unsubscribe</button>
         </div>
     </div>
 </div>
@@ -22,7 +24,8 @@
             <div class="column">
                 <div class="form-group">
                     <label for="sortBy">Sort By</label>
-                    <select class="custom-select custom-select-sm" id="sortBy" ng-model="sortBy" ng-init="sortBy='-pubdate'">
+                    <select class="custom-select custom-select-sm" id="sortBy" ng-model="sortBy"
+                        ng-init="sortBy='-pubdate'">
                         <option value="-pubdate">Publish Date</option>
                         <option value="-earned" selected>Highest Grossing</option>
                         <option value="-listens">Most Listens</option>
@@ -36,13 +39,22 @@
 
     <!-- Episode List -->
     <div id="episode-list">
-        <div ng-repeat="episode in podcast.episodes | orderBy:sortBy"> 
-            <div class="row">
-                <div class="col">
-                    <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">
-                        <h2>{{episode.title}}</h2>
-                    </a>
-                    <p ng-bind-html="episode.summary || episode.description"></p>
+        <div ng-repeat="episode in podcast.episodes | orderBy:sortBy">
+            <div class="container-fluid mb-1">
+                <div class="row">
+                    <div class="col-2">
+                        <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">
+                            <img src="{{episode.image.url}}" class="img-fluid img-thumbnail" />
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a ng-href="#!/podcast/{{podcast._id}}/{{episode._id}}">
+                            <h2>{{episode.title}}</h2>
+                        </a>
+                        <p class="text-muted">{{episode.date}}</p>
+                        <p ng-if="description" ng-bind-html="episode.summary || episode.description"></p>
+                        <button ng-click="description = !description" class="btn btn-primary">{{description ? "Hide Description" : "Show Description"}}</button>
+                    </div>
                 </div>
             </div>
         </div>

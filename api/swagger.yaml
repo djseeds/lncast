@@ -1,0 +1,562 @@
+swagger: '2.0'
+info:
+  description: >-
+    Lightning Network Podcasts
+  version: 1.0.0
+  title: LNCast
+  contact:
+    email: dj@lncast.com
+  license:
+    name: MIT License
+    url: 'https://mit-license.org/'
+host: https://lncast.com
+basePath: /api
+tags:
+  - name: podcasts
+    description: Podcast operations
+  - name: user
+    description: User operations
+paths:
+  /podcasts:
+    get:
+      tags:
+        - podcasts
+      summary: Get all podcasts
+      operationId: getAllPodcasts
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: List of all podcasts
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Podcast'
+        '500':
+          description: Internal Server Error
+  /podcast/{podcastId}:
+    get:
+      tags:
+        - podcasts
+      summary: Get a podcast by ID
+      operationId: getPodcast
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: podcastId
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
+          required: true
+          description: ID of the podcast to get
+      responses:
+        '200':
+          description: Podcast object
+          schema:
+            $ref: '#/definitions/Podcast'
+        '404':
+          description: Podcast not found
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - podcasts
+      summary: Update a podcast by ID
+      operationId: updatePodcast
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: podcastId
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
+          required: true
+          description: ID of the podcast to get
+        - in: body
+          name: podcast
+          description: Updates a podcast
+          required: true
+          schema:
+            type: object
+            properties:
+              btcPayServer:
+                type: object
+                properties:
+                  serverUrl:
+                    type: string
+                    example: "https://testnet.btcpayserver.org"
+                  pairCode:
+                      type: string
+                      example: "abc1234"
+                  storeId:
+                      type: string
+              price:
+                type: number
+                minimum: 0
+      responses:
+        '200':
+          description: Updated podcast object
+          schema:
+            $ref: '#/definitions/Podcast'
+        '401':
+          description: Access denied - User is either not logged in or does not own the podcast
+        '404':
+          description: Podcast not found
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - podcasts
+      summary: Delete a podcast by ID
+      operationId: deletePodcast
+      parameters:
+        - in: path
+          name: podcastId
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
+          required: true
+          description: ID of the podcast to get
+      responses:
+        '200':
+          description: Podcast deleted
+        '401':
+          description: Access denied - User is either not logged in or does not own the podcast
+        '404':
+          description: Podcast not found
+        '500':
+          description: Internal server error
+  /podcast/{podcastId}/{episodeId}:
+    get:
+      tags:
+        - podcasts
+      summary: Get a podcast episode by ID
+      operationId: getEpisode
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: podcastId
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
+          required: true
+          description: ID of the podcast to get
+        - in: path
+          name: episodeId
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
+          required: true
+          description: ID of the episode to get
+      responses:
+        '200':
+          description: Episode object
+          schema:
+            $ref: '#/definitions/Episode'
+        '404':
+          description: Episode not found
+        '500':
+          description: Internal server error
+  /enclosure/{enclosureId}:
+    get:
+      tags:
+        - podcasts
+      summary: Get an enclosure object by ID
+      description: >
+        [Enclosures](https://www.w3schools.com/XML/rss_tag_enclosure.asp) contain links to the podcast episode audio.
+        Enclosures must be purchased by fulfilling a [Lightning Network](https://lightning.network) invoice to the podcast owner.
+      operationId: getEnclosure
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: enclosureId
+          type: string
+          example: 5c81de155dc6ea3c1bb04a6e
+          required: true
+          description: ID of the enclosure to get
+      responses:
+        '200':
+          description: Enclosure object
+          schema:
+            $ref: '#/definitions/Enclosure'
+        '304':
+          description: Lightning payment required
+          schema:
+            $ref: '#/definitions/Invoice'
+        '404':
+          description: Enclosure not found
+        '500':
+          description: Internal server error
+  /add:
+    post:
+      tags:
+        - podcasts
+      summary: Add a podcast
+      operationId: addPodcast
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: podcast
+          description: Podcast info
+          required: true
+          schema:
+            type: object
+            properties:
+              feed:
+                type: string
+              price:
+                type: number
+              btcPayServer:
+                type: object
+                required: true
+                properties:
+                  serverUrl:
+                    type: string
+                    required: true
+                    example: "https://testnet.btcpayserver.org"
+                  storeId:
+                    type: string
+                    required: true
+                  pairCode:
+                    type: string
+                    required: true
+                    example: "abc1234"
+      responses:
+        '200':
+          description: New podcast object
+          schema:
+            $ref: '#/definitions/Podcast'
+        '400':
+          description: Bad request
+        '401':
+          description: Access denied - User is not logged in
+        '500':
+          description: Internal server error
+  /subscribe:
+    post:
+      tags:
+        - podcasts
+      summary: Subscribe to a podcast
+      operationId: subscribePodcast
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: podcast
+          description: Podcast to subscribe to
+          required: true
+          schema:
+            type: object
+            properties:
+              _id:
+                $ref: "#/definitions/ObjectId"
+                description: ID of podcast to which to subscribe.
+      responses:
+        '200':
+          description: Subscribed to podcast
+        '401':
+          description: Access denied - User is not logged in
+        '500':
+          description: Internal server error
+  /unsubscribe:
+    post:
+      tags:
+        - podcasts
+      summary: Unsubscribe to a podcast
+      operationId: unsubscribePodcast
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: podcast
+          description: Podcast to unsubscribe to
+          required: true
+          schema:
+            type: object
+            properties:
+              _id:
+                $ref: "#/definitions/ObjectId"
+                description: ID of podcast to which to unsubscribe.
+      responses:
+        '200':
+          description: Unsubscribed to podcast
+        '401':
+          description: Access denied - User is not logged in
+        '500':
+          description: Internal server error
+  /account:
+    get:
+      tags:
+        - user
+      summary: Get user account info
+      operationId: getAccount
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User account info
+          schema:
+            $ref: "#/definitions/User"
+        '401':
+          description: Access denied - User is not logged in
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - user
+      summary: Delete user account
+      operationId: deleteAccount
+      responses:
+        '200':
+          description: Deleted user account
+        '401':
+          description: Access denied - User is not logged in
+        '500':
+          description: Internal server error
+  /account/subscriptions:
+    get:
+      tags:
+        - user
+      summary: Get user's subscriptions
+      operationId: getSubscriptions
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User's subscriptions
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Podcast"
+        '401':
+          description: Access denied - User is not logged in
+        '500':
+          description: Internal server error
+  /account/register:
+    post:
+      tags:
+        - user
+      summary: Register new user
+      operationId: registerUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          description: User information
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: User's account info
+          schema:
+            $ref: "#/definitions/User"
+        '500':
+          description: Internal server error
+  /account/login:
+    post:
+      tags:
+        - user
+      summary: Login to existing user account
+      operationId: login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          description: User information
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: User's account info
+          schema:
+            $ref: "#/definitions/User"
+        '500':
+          description: Internal server error
+  /account/logout:
+    post:
+      tags:
+        - user
+      summary: Logout of user session
+      operationId: logout
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal server error
+          
+
+definitions:
+  Podcast:
+    type: object
+    properties:
+      _id:
+        $ref: "#/definitions/ObjectId"
+      title:
+        type: string
+      description:
+        type: string
+      link:
+        type: string
+      date:
+        type: string
+      pubdate:
+        type: string
+      author:
+        type: string
+      language:
+        type: string
+      image:
+        type: object
+        properties:
+          url:
+            type: string
+          title:
+            type: string
+      favicon:
+        type: string
+      copyright:
+        type: string
+      generator:
+        type: string
+      categories:
+        type:  array
+        items:
+          type: string
+      episodes:
+        type: array
+        items:
+          $ref: "#/definitions/ObjectId"
+      price:
+        type: number
+        minimum: 0
+      earned:
+        type: number
+        minimum: 0
+      listens:
+        type: number
+        minimum: 0
+      btcPayServer:
+        type: object
+        properties:
+          serverUrl:
+            type: string
+            example: "https://testnet.btcpayserver.org"
+          storeId:
+            type: string
+  Episode:
+    type: object
+    properties:
+      _id:
+        $ref: "#/definitions/ObjectId"
+      title:
+        type: string
+      description:
+        type: string
+      summary:
+        type: string
+      date:
+        type: date
+        example: "1985-04-12T23:20:50.52Z"
+      pubdate:
+        type: date
+        example: "1985-04-12T23:20:50.52Z"
+      author:
+        type: string
+      comments:
+        type: string
+      image:
+        type: object
+        properties:
+          url:
+            type: string
+          title:
+            type: string
+      categories:
+        type:  array
+        items:
+          type: string
+      enclosure:
+        $ref: "#/definitions/ObjectId"
+      earned:
+        type: number
+        minimum: 0
+      listens:
+        type: number
+        minimum: 0
+  Enclosure:
+    type: object
+    properties:
+      _id:
+        $ref: "#/definitions/ObjectId"
+      url:
+        type: string
+      filesize:
+        type: number
+        minimum: 0
+      type:
+        type: string
+  Invoice:
+    type: object
+    properties:
+      _id:
+        $ref: "#/definitions/ObjectId"
+      id:
+        type: string
+      price: 
+        type: number
+        minimum: 0
+      currency:
+        type: string
+        example: "USD"
+      url:
+        type: string
+      invoiceTime: 
+        type: number
+      expirationTime:
+        type: number
+      addresses:
+        type: object
+        properties:
+          BTC_LightningLike:
+            type: string
+  User:
+    type: object
+    properties:
+      _id:
+        $ref: "#/definitions/ObjectId"
+      username:
+        type: string
+      owns:
+        type: array
+        items:
+          $ref: "#/definitions/ObjectId"
+      subscriptions:
+        type: array
+        items:
+          $ref: "#/definitions/ObjectId"
+  ObjectId:
+    type: string
+    example: 5c81de155dc6ea3c1bb04a6e
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'

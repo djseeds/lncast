@@ -1,39 +1,55 @@
 {
   "name": "lncast",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "start": "node ./bin/www"
-  },
+  "version": "1.0.0",
+  "description": "Lightning Network Podcatcher",
+  "main": "app.js",
   "bin": "bin/www",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/djseeds/lncast.git"
+    "url": "git+https://github.com/djseeds/lncast.git"
   },
+  "keywords": [
+    "lightning",
+    "lnd",
+    "bitcoin",
+    "podcast",
+    "nodejs"
+  ],
+  "author": "DJ Seeds",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/djseeds/lncast/issues"
+  },
+  "homepage": "https://github.com/djseeds/lncast#readme",
   "dependencies": {
-    "@grpc/proto-loader": "^0.4.0",
     "angular-qrcode": "^7.2.0",
-    "body-parser": "~1.18.2",
-    "cookie-parser": "~1.4.3",
-    "debug": "~4.1.1",
-    "express": "~4.16.4",
+    "btcpay": "github:btcpayserver/node-btcpay",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.16.4",
     "express-https-redirect": "^1.0.0",
     "express-session": "^1.15.6",
-    "feedparser": "^2.2.7",
-    "grpc": "^1.11.3",
-    "mongoose": "^5.4.11",
-    "morgan": "~1.9.0",
+    "feedparser": "^2.2.9",
+    "flat": "^4.1.0",
+    "mongoose": "^5.4.16",
+    "morgan": "^1.9.1",
     "ngclipboard": "^2.0.0",
     "node-cron": "^2.0.3",
-    "node-podcast-parser": "^2.0.0",
     "passport": "^0.4.0",
-    "passport-local": "^1.0.0",
     "passport-local-mongoose": "^5.0.1",
-    "podcatcher": "^0.2.1",
     "prerender-node": "^3.2.1",
-    "pug": "2.0.3",
-    "serve-favicon": "~2.5.0",
+    "request": "^2.88.0",
+    "serve-favicon": "^2.5.0",
+    "swagger-express-middleware": "^2.0.1",
+    "swagger-ui-express": "^4.0.2",
     "twitter": "^1.7.1",
-    "unique-concat": "^0.2.2"
+    "unique-concat": "^0.2.2",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.15.0",
+    "eslint-config-google": "^0.12.0"
   }
 }

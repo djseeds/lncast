@@ -26,7 +26,7 @@
   "homepage": "https://github.com/djseeds/lncast#readme",
   "dependencies": {
     "angular-qrcode": "^7.2.0",
-    "btcpay": "github:btcpayserver/node-btcpay",
+    "btcpay": "^0.2.1",
     "cookie-parser": "^1.4.4",
     "express": "^4.16.4",
     "express-https-redirect": "^1.0.0",

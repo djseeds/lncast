@@ -22,7 +22,13 @@ module.exports.addInvoice = function(enclosure, callback) {
       callback(err);
       return;
     }
-    client.create_invoice({price: podcast.price, currency: 'USD'})
+    client.create_invoice(
+        {
+          price: podcast.price,
+          currency: 'USD',
+          itemCode: 'lncast',
+          itemDesc: podcast.title,
+        })
         .then(function(invoice) {
           callback(null, invoice);
         })

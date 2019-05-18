@@ -126,6 +126,16 @@ EnclosureSchema.methods.getPrice = function(callback) {
   });
 };
 
+EnclosureSchema.methods.getEpisode = function(callback) {
+  Episode.findOne({'enclosure': this._id}, function(err, episode) {
+    if (err) {
+      console.log(err);
+      callback(err, null);
+    }
+    callback(null, episode);
+  });
+};
+
 EnclosureSchema.methods.getPodcast = function(callback) {
   Episode.findOne({'enclosure': this._id}, function(err, episode) {
     if (err) {

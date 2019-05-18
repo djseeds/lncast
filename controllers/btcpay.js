@@ -16,25 +16,31 @@ module.exports.pairClient = function(btcpayUrl, pairCode, callback) {
 };
 
 module.exports.addInvoice = function(enclosure, callback) {
-  enclosure.getPodcast(function(err, podcast) {
-    const client = getBtcPayClient(podcast);
+  enclosure.getEpisode(function(err, episode) {
     if (err) {
       callback(err);
       return;
     }
-    client.create_invoice(
-        {
-          price: podcast.price,
-          currency: 'USD',
-          itemCode: 'lncast',
-          itemDesc: podcast.title,
-        })
-        .then(function(invoice) {
-          callback(null, invoice);
-        })
-        .catch(function(err) {
-          callback(err);
-        });
+    episode.getPodcast(function(err, podcast) {
+      const client = getBtcPayClient(podcast);
+      if (err) {
+        callback(err);
+        return;
+      }
+      client.create_invoice(
+          {
+            price: podcast.price,
+            currency: 'USD',
+            itemCode: 'lncast',
+            itemDesc: episode.title,
+          })
+          .then(function(invoice) {
+            callback(null, invoice);
+          })
+          .catch(function(err) {
+            callback(err);
+          });
+    });
   });
 };
 

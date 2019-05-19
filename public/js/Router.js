@@ -47,6 +47,10 @@ app.config(function($routeProvider) {
         templateUrl: 'views/addpodcast.html',
         controller: 'AddPodcastCtrl',
       })
+      .when('/donate/', {
+        templateUrl: 'views/donate.html',
+        controller: 'DonationCtrl',
+      })
       .otherwise({
         redirectTo: '/',
       });

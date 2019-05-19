@@ -29,6 +29,7 @@ router.get('/podcast/:podcastID', function(req, res, next) {
         } else {
           if (!podcast) {
             res.status(404).send('Podcast not found.');
+            return;
           }
           // If user is logged in, check if they are subscribed
           if (req.user) {
@@ -65,7 +66,7 @@ router.post('/podcast/:podcastID', function(req, res, next) {
     if (req.body.btcPayServer) {
       // Check if only one of {serverUrl, pairCode} is set.
       if ((req.body.btcPayServer.serverUrl == null)
-                != (req.body.btcPayServer.pairCode == null)) {
+        != (req.body.btcPayServer.pairCode == null)) {
         return next(
             new Error('serverUrl and pairCode can only be updated together.')
         );
@@ -123,7 +124,6 @@ router.delete('/podcast/:podcastID', function(req, res, next) {
   if (req.isAuthenticated() && req.user.owns.findIndex(function(id) {
     return id.toString() == req.params.podcastID;
   }) != -1) {
-    console.log('Deleting');
     db.Podcast.removeById(req.params.podcastID, function(err, podcast) {
       if (err) {
         console.log(err);
@@ -147,11 +147,17 @@ router.get('/podcast/:podcastID/:episodeID', function(req, res, next) {
       .exec(function(err, podcast) {
         if (err) {
           next(err);
+        } else if (!podcast) {
+          res.status(404);
+          res.send('Not Found');
         } else {
           db.Episode.findById(req.params.episodeID)
               .exec(function(err, episode) {
                 if (err) {
                   next(err);
+                } else if (!episode) {
+                  res.status(404);
+                  res.send('Not Found');
                 } else {
                   res.json(episode);
                 }

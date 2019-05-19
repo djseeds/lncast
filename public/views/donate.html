@@ -1,0 +1,50 @@
+<!doctype html>
+
+<div class="jumbotron text-center">
+  <h1>Donate to LNCast</h1>
+</div>
+
+<div class="m-3">
+
+  <h3>Find LNCast valuable? Want to support its further development or other future developments?
+    <br/>Considering tossing a
+    few sats my way!</h3>
+
+  <div ng-repeat="items in donationItems">
+    <div class="card-deck row">
+      <div class="card m-3 mx-auto col-md-4 col-sm-12" ng-repeat="item in items">
+        <img ng-src="{{item.imageUrl}}" class="card-img-top">
+        <div class="card-body d-flex flex-column">
+          <h3 class="card-title">{{item.title}}</h3>
+          <p class="card-text">{{item.message}}</p>
+          <form ng-submit="showModal(item)" class="mt-auto">
+            <div ng-if="item.collectMessage" class="form-group">
+              <div ng-if="!item.collectMessageMultiline" class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">{{item.collectMessagePrompt}}</span>
+                </div>
+                <input class="form-control" ng-model="item.itemDesc" required placeholder="Message"
+                  ng-attr-maxlength="{{item.maxMessageLength || 524288}}">
+              </div>
+              <div ng-if="item.collectMessageMultiline">
+                <label for="message">{{item.collectMessagePrompt}}</label>
+                <textarea ng-model="item.itemDesc" class="form-control" rows="5" id="message"
+                  ng-attr-maxlength="{{item.maxMessageLength || 524288}}" required></textarea>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="input-group">
+                <input ng-model="item.amount" ng-readonly="!item.customAmount" type="number" ng-attr-min="{{item.minAmount || 0.01}}"
+                  step="any" placeholder="Contribution Amount" class="form-control" required>
+                <div class="input-group-append">
+                  <span class="input-group-text">USD</span>
+                  <button class="btn btn-primary">Continue</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,108 +2,129 @@
 
 <!-- Assign Angular Module -->
 <html ng-app="myApp">
-    <head>
-        <link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css">
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <!-- Twitter summary card tags -->
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:site" content="@LNPodcasts" />
-        <meta name="twitter:title" content="{{meta.title || 'LNCast'}}" />
-        <meta name="twitter:description" content="{{meta.description || 'Lightning Network Podcasts'}}" />
-        <meta name="twitter:image" content="{{meta.image || 'https://lncast.com/logo.png'}}" />
-        <!-- OpenGraph meta tags -->
-        <meta name="og:title" content="{{meta.title || 'LNCast'}}" />
-        <meta name="og:image" content="{{meta.image || 'https://lncast.com/logo.png'}}" />
-        <meta name="og:site_name" content="LNCast" />
-        <meta name="og:description" content="{{meta.description || 'Lightning Network Podcasts'}}" />
-        <meta name="og:type" content="article" />
 
-        <title>LNCast</title>
+<head>
+    <link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Twitter summary card tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@LNPodcasts" />
+    <meta name="twitter:title" content="{{meta.title || 'LNCast'}}" />
+    <meta name="twitter:description" content="{{meta.description || 'Lightning Network Podcasts'}}" />
+    <meta name="twitter:image" content="{{meta.image || 'https://lncast.com/logo.png'}}" />
+    <!-- OpenGraph meta tags -->
+    <meta name="og:title" content="{{meta.title || 'LNCast'}}" />
+    <meta name="og:image" content="{{meta.image || 'https://lncast.com/logo.png'}}" />
+    <meta name="og:site_name" content="LNCast" />
+    <meta name="og:description" content="{{meta.description || 'Lightning Network Podcasts'}}" />
+    <meta name="og:type" content="article" />
 
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular-route.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular-sanitize.js"></script>
-        <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js"></script>
-        <script src="https://use.fontawesome.com/8fc0f1b441.js"></script>
-        <script src="/js/Router.js"></script>
-        <script src="/js/controllers/MainCtrl.js"></script>
-        <script src="/js/controllers/PodcastCtrl.js"></script>
-        <script src="/js/controllers/EpisodeCtrl.js"></script>
-        <script src="/js/controllers/LoginCtrl.js"></script>
-        <script src="/js/controllers/LogoutCtrl.js"></script>
-        <script src="/js/controllers/RegisterCtrl.js"></script>
-        <script src="/js/controllers/AccountCtrl.js"></script>
-        <script src="/js/controllers/AddPodcastCtrl.js"></script>
-        <script src="/js/controllers/SubscriptionCtrl.js"></script>
-        <script src="/js/controllers/ContributeCtrl.js"></script>
-        <script src="/node_modules/qrcode-generator/qrcode.js"></script>
-        <script src="/node_modules/qrcode-generator/qrcode_UTF8.js"></script>
-        <script src="/node_modules/angular-qrcode/angular-qrcode.js"></script>
-        <script src="/node_modules/ngclipboard/dist/ngclipboard.min.js"></script>
-        <style type="text/css">
-            #error-container {
-                margin-top: 10px;
-                position: fixed;
-            }
-        </style>
-    </head>
+    <title>LNCast</title>
 
-    <!-- Navigation bar setup -->
-    <nav class="navbar navbar-toggleable-md navbar-dark bg-dark">
-        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#!">LNCast ⚡  Lightning Network Podcasts</a>
-        <form class="form-inline">
-            <a target="_blank" href="/api-docs" class="m-1">API</a>
-            <a target="_blank" href="https://github.com/djseeds/lncast"><i class="fa fa-github m-1" aria-hidden="true"></i></a>
-            <a target="_blank" href="https://twitter.com/LNPodcasts"><i class="fa fa-twitter m-1" aria-hidden="true"></i></a>
-        </form>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular-route.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular-sanitize.js"></script>
+    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js"></script>
+    <script src="https://use.fontawesome.com/8fc0f1b441.js"></script>
+    <script src="/js/Router.js"></script>
+    <script src="/js/controllers/MainCtrl.js"></script>
+    <script src="/js/controllers/PodcastCtrl.js"></script>
+    <script src="/js/controllers/EpisodeCtrl.js"></script>
+    <script src="/js/controllers/LoginCtrl.js"></script>
+    <script src="/js/controllers/LogoutCtrl.js"></script>
+    <script src="/js/controllers/RegisterCtrl.js"></script>
+    <script src="/js/controllers/AccountCtrl.js"></script>
+    <script src="/js/controllers/AddPodcastCtrl.js"></script>
+    <script src="/js/controllers/SubscriptionCtrl.js"></script>
+    <script src="/js/controllers/ContributeCtrl.js"></script>
+    <script src="/node_modules/qrcode-generator/qrcode.js"></script>
+    <script src="/node_modules/qrcode-generator/qrcode_UTF8.js"></script>
+    <script src="/node_modules/angular-qrcode/angular-qrcode.js"></script>
+    <script src="/node_modules/ngclipboard/dist/ngclipboard.min.js"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140454185-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                    <li class="nav-item", ng-hide="activeUser == undefined">
-                        <a class="nav-link" href="#!/subscriptions">Subscriptions</a>
-                    </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#!/add-podcast">Add a Podcast</a>
+        gtag('config', 'UA-140454185-1');
+    </script>
+
+    <style type="text/css">
+        #error-container {
+            margin-top: 10px;
+            position: fixed;
+        }
+    </style>
+</head>
+
+<!-- Navigation bar setup -->
+<nav class="navbar navbar-toggleable-md navbar-dark bg-dark">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#!">LNCast ⚡ Lightning Network Podcasts</a>
+    <form class="form-inline">
+        <a target="_blank" href="/api-docs" class="m-1">API</a>
+        <a target="_blank" href="https://github.com/djseeds/lncast"><i class="fa fa-github m-1"
+                aria-hidden="true"></i></a>
+        <a target="_blank" href="https://twitter.com/LNPodcasts"><i class="fa fa-twitter m-1"
+                aria-hidden="true"></i></a>
+    </form>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item" , ng-hide="activeUser == undefined">
+                <a class="nav-link" href="#!/subscriptions">Subscriptions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#!/add-podcast">Add a Podcast</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" data-target="#accountContent" aria-controls="accountContent"
+                    aria-expanded="false">Account <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+            </li>
+            <div id="accountContent" class="collapse">
+                <li class="nav-item" , ng-show="activeUser == undefined">
+                    <a class="nav-link" href="#!/login">Login</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" data-target="#accountContent" aria-controls="accountContent" aria-expanded="false">Account <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                <li class="nav-item" , ng-show="activeUser == undefined">
+                    <a class="nav-link" href="#!/register">Create an Account</a>
                 </li>
-                <div id="accountContent" class="collapse">
-                    <li class="nav-item", ng-show="activeUser == undefined">
-                        <a class="nav-link" href="#!/login">Login</a>
-                    </li>
-                    <li class="nav-item", ng-show="activeUser == undefined">
-                        <a class="nav-link" href="#!/register">Create an Account</a>
-                    </li>
-                    <li class="nav-item", ng-hide="activeUser == undefined">
-                        <a class="nav-link" href="#!/account">My Account</a>
-                    </li>
-                    <li class="nav-item", ng-hide="activeUser == undefined">
-                        <a class="nav-link" href="#!/logout">Logout</a>
-                    </li>
-                </div>
-                <li class="nav-item">
-                    <a class="nav-link" href="#!/about">About</a>
+                <li class="nav-item" , ng-hide="activeUser == undefined">
+                    <a class="nav-link" href="#!/account">My Account</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#!/contribute">Contribute</a>
+                <li class="nav-item" , ng-hide="activeUser == undefined">
+                    <a class="nav-link" href="#!/logout">Logout</a>
                 </li>
-            </ul>
-        </div>
-    </nav>
+            </div>
+            <li class="nav-item">
+                <a class="nav-link" href="#!/about">About</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#!/contribute">Contribute</a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
 
-    <body>
-        <ng-view></ng-view>
-        <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-        <script src="https://btcpayserver.lncast.com:23000/modal/btcpay.js"></script>
-        <script src="https://djseeds.github.io/btcpay-browser-client/btcpay-browser-client.js"></script>
-    </body>
-
+<body>
+    <ng-view></ng-view>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+        integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+        integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+        integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+        crossorigin="anonymous"></script>
+    <script src="https://btcpayserver.lncast.com:23000/modal/btcpay.js"></script>
+    <script src="https://djseeds.github.io/btcpay-browser-client/btcpay-browser-client.js"></script>
+</body>

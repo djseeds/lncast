@@ -11,9 +11,6 @@ app.config(function($routeProvider) {
       .when('/about', {
         templateUrl: 'views/about.html',
       })
-      .when('/contact', {
-        templateUrl: 'views/contact.html',
-      })
       .when('/login', {
         templateUrl: 'views/login.html',
         controller: 'LoginCtrl',
@@ -47,9 +44,9 @@ app.config(function($routeProvider) {
         templateUrl: 'views/addpodcast.html',
         controller: 'AddPodcastCtrl',
       })
-      .when('/donate/', {
-        templateUrl: 'views/donate.html',
-        controller: 'DonationCtrl',
+      .when('/contribute/', {
+        templateUrl: 'views/contribute.html',
+        controller: 'ContributeCtrl',
       })
       .otherwise({
         redirectTo: '/',

@@ -1,5 +1,5 @@
-angular.module('myApp').controller('DonationCtrl', ['$scope',
-  function donationController($scope) {
+angular.module('myApp').controller('ContributeCtrl', ['$scope',
+  function contributeController($scope) {
     const numColumns = 2;
 
     const btcPayServerUrl = 'https://btcpayserver.lncast.com:23000';

@@ -2,62 +2,100 @@
 <div class="jumbotron text-center">
     <h1>About LNCast</h1>
 </div>
-<p class="ml-3 mr-3">
-LNCast is a <a href="https://en.wikipedia.org/wiki/List_of_podcatchers" target="_blank">podcatcher</a> that allows creators to monetize their podcasts using micropayments on the <a href="https://lightning.network" target="_blank">Lightning Network</a>: a second layer on top of <a href="https://bitcoin.org" target="_blank">Bitcoin</a> that enables instant, trustless micropayments.
-<br/>
-While being focused on podcasts, LNCast is a proof of concept for a broader idea: mircropayments in exchange for data.
-</p>
-<h2>Motivation</h2>
-<p class="ml-3 mr-3">
-The truth is: podcasting costs money. Storage and bandwidth can <a href="https://www.thepodcasthost.com/planning/cost-of-podcasting/" target="_blank">quickly add up</a>, forcing creators to either eat the costs or look for some source of funding.
-</p>
-<h4>Existing Funding Models</h4>
-<dl class="ml-3 mr-3">
-    <dt>Advertisements</dt>
-    <dd>
-    Ads are the most common way for creators to monetize their podcasts. I probably don't need to tell you why ads suck, but here it is anyways:
+<div class="m-3">
+    <p>
+        LNCast is a <a href="https://en.wikipedia.org/wiki/List_of_podcatchers" target="_blank">podcatcher</a> that
+        allows creators to monetize their podcasts using micropayments on the <a href="https://lightning.network"
+            target="_blank">Lightning Network</a>: a second layer on top of <a href="https://bitcoin.org"
+            target="_blank">Bitcoin</a> that enables instant, trustless micropayments.
+        <br />
+        While being focused on podcasts, LNCast is a proof of concept for a broader idea: mircropayments in exchange for
+        data.
+    </p>
+    <h2>Motivation</h2>
+    <p>
+        The truth is: podcasting costs money. Storage and bandwidth can <a
+            href="https://www.thepodcasthost.com/planning/cost-of-podcasting/" target="_blank">quickly add up</a>,
+        forcing creators to either eat the costs or look for some source of funding.
+    </p>
+    <h4>Existing Funding Models</h4>
+    <dl>
+        <dt>Advertisements</dt>
+        <dd>
+            Ads are the most common way for creators to monetize their podcasts. I probably don't need to tell you why
+            ads suck, but here it is anyways:
+            <ul>
+                <li>Bad user experience: nobody wants their favorite podcast to be interrupted by yet another <a
+                        href="https://www.theatlantic.com/business/archive/2015/05/why-so-many-podcasts-are-brought-to-you-by-squarespace/392840/"
+                        target="_blank">Squarespace plug</a>.</li>
+                <li>Favor popular podcasts: advertisers naturally prefer popular podcasts, which leaves niche or
+                    up-and-coming podcasts out in the cold.</li>
+                <li>Time-consuming: instead of focusing on creating great content, creators must spend time seeking
+                    sponsors and creating ads.</li>
+            </ul>
+        </dd>
+        <dt>Crowdfunding</dt>
+        <dd>Crowdfunding allows passionate listeners to support their favorite podcasts using cold, hard cash.
+            Crowdfunding improves upon the user experience of advertisements, but it still has major flaws:</dd>
+        <ul>
+            <li>High minimum contribution: most crowdfunding sites have a high <a
+                    href="https://patreon.zendesk.com/hc/en-us/articles/203913659-Can-I-pay-a-creator-any-dollar-amount-"
+                    target="_blank">minimum contribution</a>, which prevents the possibility of many listeners
+                contributing small amounts.</li>
+            <li>User effort: in order to contribute, users must navigate to an external website and enter their payment
+                details. This added effort may dissuade some listeners from contributing.
+            <li>Fees: crowdfunding sites add <a
+                    href="https://patreon.zendesk.com/hc/en-us/articles/204606125-How-do-you-calculate-fees-"
+                    target="_blank">another layer of fees</a> atop already-high <a
+                    href="https://www.paypal.com/ag/selfhelp/article/what-are-the-fees-for-paypal-accounts-faq690"
+                    target="_blank">payment processor fees</a>. These fees limit the amount of money that reaches
+                creators and once again disincentivizes small contributions.
+            <li>Risk of Deplatforming: Crowdfunding sites have recently <a
+                    href="https://news.vice.com/en_us/article/qvqeev/crowdfunding-site-patreon-is-purging-far-right-figures"
+                    target="_blank">deplatformed some users</a>, leaving them without the ability to fund their creations.</li>
+        </ul>
+    </dl>
+    <h4>Funding with Micropayments on Lightning</h4>
+    <p>
+        Micropayments on Lightning offer a far superior funding model for creators and listeners alike. Contrasting with
+        the above funding models, there are obvious advantages to this model:
+    </p>
     <ul>
-        <li>Bad user experience: nobody wants their favorite podcast to be interrupted by yet another <a href="https://www.theatlantic.com/business/archive/2015/05/why-so-many-podcasts-are-brought-to-you-by-squarespace/392840/" target="_blank">Squarespace plug</a>.</li>
-        <li>Favor popular podcasts: advertisers naturally prefer popular podcasts, which leaves niche or up-and-coming podcasts out in the cold.</li>
-        <li>Time-consuming: instead of focusing on creating great content, creators must spend time seeking sponsors and creating ads.</li>
+        <li>No need for ads: when users can pay 1.5 cents for an episode (<a
+                href="https://www.advertisecast.com/podcast-advertising-rates" target="_blank">the cost-per-listen of a
+                typical podcast ad</a>), creators can afford to have no ads.</li>
+        <li>Low fees: with <a
+                href="https://bitcoinmagazine.com/articles/bitcoin-lightning-network-creators-fees-will-be-effectively-zero-1459955513/"
+                target="_blank">near-zero fees</a>, users can be sure that their money is going to support creators, not
+            for the maintenance and profit of legacy banking networks.</li>
+        <li>Low minimum payment: with payments as small as <a href="https://99bitcoins.com/satoshi-usd-converter/"
+                target="_blank">1 satoshi</a> (0.00000001 bitcoin), listeners are free to contribute small amounts of
+            money, which can add up to large contributions.</li>
+        <li>Simple user experience: with <a href="https://twitter.com/alexbosworth/status/929937928519761921"
+                target="_blank">one-click payments</a>, little added effort will be required from users.</li>
+        <li>Agnostic to popularity: whether a podcast has millions of listeners or a single listener, creators can raise
+            the money needed to support their podcast.</li>
     </ul>
-    </dd>
-    <dt>Crowdfunding</dt>
-    <dd>Crowdfunding allows passionate listeners to support their favorite podcasts using cold, hard cash. Crowdfunding improves upon the user experience of advertisements, but it still has major flaws:</dd>
+    <h2>Lightning Network Wallets</h2>
+    <p>
+        LNCast is compatible with all <a href="https://github.com/lightningnetwork/lightning-rfc"
+            target="_blank">BOLT</a>-compliant lightning implementations.
+        <br>
+        If you are comfortable with the command line, you can use any of the three implementations directly:
+    </p>
     <ul>
-        <li>High minimum contribution: most crowdfunding sites have a high <a href="https://patreon.zendesk.com/hc/en-us/articles/203913659-Can-I-pay-a-creator-any-dollar-amount-" target="_blank">minimum contribution</a>, which prevents the possibility of many listeners contributing small amounts.</li>
-        <li>User effort: in order to contribute, users must navigate to an external website and enter their payment details. This added effort may dissuade some listeners from contributing.
-        <li>Fees: crowdfunding sites add <a href="https://patreon.zendesk.com/hc/en-us/articles/204606125-How-do-you-calculate-fees-" target="_blank">another layer of fees</a> atop already-high <a href="https://www.paypal.com/ag/selfhelp/article/what-are-the-fees-for-paypal-accounts-faq690" target="_blank">payment processor fees</a>. These fees limit the amount of money that reaches creators and once again disincentivizes small contributions.
+        <li><a href="https://github.com/lightningnetwork/lnd" target="_blank">LND</a></li>
+        <li><a href="https://github.com/ACINQ/eclair" target="_blank">Eclair</a></li>
+        <li><a href="https://github.com/ElementsProject/lightning" target="_blank">c-lightning</a></li>
     </ul>
-</dl>
-<h4>Funding with Micropayments on Lightning</h4>
-<p class="ml-3 mr-3">
-Micropayments on Lightning offer a far superior funding model for creators and listeners alike. Contrasting with the above funding models, there are obvious advantages to this model:
-</p>
-<ul class="ml-3 mr-3">
-    <li>No need for ads: when users can pay 1.5 cents for an episode (<a href="https://www.advertisecast.com/podcast-advertising-rates" target="_blank">the cost-per-listen of a typical podcast ad</a>), creators can afford to have no ads.</li>
-    <li>Low fees: with <a href="https://bitcoinmagazine.com/articles/bitcoin-lightning-network-creators-fees-will-be-effectively-zero-1459955513/" target="_blank">near-zero fees</a>, users can be sure that their money is going to support creators, not for the maintenance and profit of legacy banking networks.</li>
-    <li>Low minimum payment: with payments as small as <a href="https://99bitcoins.com/satoshi-usd-converter/" target="_blank">1 satoshi</a> (0.00000001 bitcoin), listeners are free to contribute small amounts of money, which can add up to large contributions.</li>
-    <li>Simple user experience: with <a href="https://twitter.com/alexbosworth/status/929937928519761921" target="_blank">one-click payments</a>, little added effort will be required from users.</li>
-    <li>Agnostic to popularity: whether a podcast has millions of listeners or a single listener, creators can raise the money needed to support their podcast.</li>
-</ul>
-<h2>Lightning Network Wallets</h2>
-<p class="ml-3 mr-3">
-LNCast is currently running on the <a href="https://en.bitcoin.it/wiki/Testnet" target="_blank">Bitcoin Testnet</a>, and is compatible with all <a href="https://github.com/lightningnetwork/lightning-rfc" target="_blank">BOLT</a>-compliant lightning implementations.
-<br>
-If you are comfortable with the command line, you can use any of the three implementations directly:
-</p>
-<ul class="ml-3 mr-3">
-    <li><a href="https://github.com/lightningnetwork/lnd" target="_blank">LND</a></li>
-    <li><a href="https://github.com/ACINQ/eclair" target="_blank">Eclair</a></li>
-    <li><a href="https://github.com/ElementsProject/lightning" target="_blank">c-lightning</a></li>
-</ul>
-<p class="ml-3 mr-3">
-You can also any of the more user-friendly lightning wallets, including:
-</p>
-<ul class="ml-3 mr-3">
-    <li><a href="https://github.com/LN-Zap/zap-desktop" target="_blank">Zap</a></li>
-    <li><a href="https://github.com/lightninglabs/lightning-app/releases" target="_blank">lightning-app</a></li>
-    <li><a href="https://play.google.com/store/apps/details?id=fr.acinq.eclair.wallet" target="_blank">Eclair Android</a></li>
-    <li><a href="https://htlc.me" target="_blank">HTLC.me</a></li>
-</ul>
+    <p>
+        You can also any of the more user-friendly lightning wallets, including:
+    </p>
+    <ul>
+        <li><a href="https://zap.jackmallers.com/" target="_blank">Zap</a></li>
+        <li><a href="https://github.com/lightninglabs/lightning-app/releases" target="_blank">lightning-app</a></li>
+        <li><a href="https://play.google.com/store/apps/details?id=fr.acinq.eclair.wallet.mainnet2"
+                target="_blank">Eclair
+                Android</a></li>
+    </ul>
+</div>

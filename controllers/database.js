@@ -404,97 +404,33 @@ module.exports = {
   User: User,
 };
 
-const updateEpisode = function(data) {
+const updateEpisode = function(data, callback) {
   Episode.findOne({'guid': data.guid})
       .populate('enclosure')
       .exec(function(err, episode) {
+        let isNew = false;
+        if (err) {
+          callback(err);
+          return;
+        }
         if (!episode) {
-          // Add a new episode
-          Podcast.findOne({'xmlurl': data.meta.xmlurl}, function(err, podcast) {
-            if (podcast) {
-              episode = new Episode(data);
-              if (data.enclosures) {
-                const enclosure = data.enclosures[0];
-                episode.enclosure = new Enclosure(enclosure);
-                episode.enclosure.save();
-              }
-              episode.save();
-              podcast.episodes.push(episode);
-              podcast.save();
-              twitter.announceEpisode(podcast, episode,
-                  function(err, tweet, response) {
-                    if (err) {
-                      console.log('Failed to announce episode!');
-                      console.log(err);
-                    } else {
-                      console.log('Successfully announced episode!');
-                    }
-                  });
-            }
-          });
+          isNew = true;
+          episode = data;
+          episode.save();
+          episode.enclosure.save();
         } else if (data.date > episode.date) {
-          if (data.enclosures) {
-            const enclosure = data.enclosures[0];
-            if (episode.enclosure.url != enclosure.url) {
-              episode.enclosure = new Enclosure(enclosure);
-              episode.enclosure.save();
-            }
+          console.log(data.toObject());
+          // Don't create a new enclosure
+          if (episode.enclosure.url == data.enclosure.url) {
+            updateObject(episode, data, ['enclosure']);
+            episode.enclosure.save();
+          } else {
+            updateObject(episode, data);
           }
-          Object.assign(episode, data);
           episode.save();
         }
+        callback(null, episode, isNew);
       });
-};
-
-const updatePodcast = function(data) {
-  Podcast.findOne({'xmlurl': data.xmlurl}, function(err, podcast) {
-    if (err || !podcast) {
-      return;
-    }
-    if (data.date > podcast.date) {
-      Object.assign(podcast, data);
-      podcast.save();
-    }
-  });
-};
-
-const refreshFeed = function(feed) {
-  const feedparser = new FeedParser();
-
-  feedparser.on('error', function(err) {
-    this.destroy(err);
-  });
-
-  feedparser.on('meta', function(meta) {
-    updatePodcast(meta);
-  });
-
-  feedparser.on('readable', function() {
-    const stream = this;
-    while (item = stream.read()) {
-      updateEpisode(item);
-    }
-  });
-
-  feedparser.on('close', function(err) {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    return;
-  });
-
-  feedparser.on('end', function(err) {
-    this.destroy();
-  });
-
-  request
-      .get(feed)
-      .on('error', function(err) {
-        console.log(err);
-        return;
-      })
-      .pipe(feedparser);
 };
 
 module.exports.refreshAll = function() {
@@ -504,13 +440,63 @@ module.exports.refreshAll = function() {
       console.log(err);
       return;
     }
-    podcasts.forEach(function(podcast) {
-      refreshFeed(podcast.xmlurl);
+    const promises = podcasts.map(refreshPodcast);
+    Promise.all(promises).then(function(podcasts) {
+      console.log('Done refreshing feeds');
+    }).catch(function(err) {
+      console.log('Failed to refresh feeds.');
+      console.error(err);
     });
-    console.log('Done refreshing feeds');
   });
 };
 
+const refreshPodcast = function(podcast) {
+  return new Promise(function(resolve, reject) {
+    parseFeed(podcast.xmlurl, function(err, updatedPodcast) {
+      if (err) {
+        reject(err);
+      }
+      const promises = updatedPodcast.episodes.map(function(episode) {
+        return new Promise(function(resolve, reject) {
+          updateEpisode(episode, function(err, updatedEpisode, isNew) {
+            if (err) {
+              reject(err);
+            }
+            if (isNew) {
+            // Push to Podcast episodes.
+              podcast.episodes.push(updatedEpisode);
+              // Announce episode.
+              twitter.announceEpisode(podcast, episode,
+                  function(err) {
+                    if (err) {
+                      console.log('Failed to announce episode!');
+                      console.log(err);
+                    }
+                  });
+            }
+            resolve(episode);
+          });
+        });
+      });
+      Promise.all(promises).then(function(episodes) {
+        // Don't overwrite xml URL or episodes.
+        updateObject(podcast, updatedPodcast, ['episodes', 'xmlurl']);
+        podcast.save();
+        resolve(podcast);
+      });
+    });
+  });
+};
+
+const updateObject = function(object, update, excludeFields=[]) {
+  const updateObject = update.toObject();
+  // Never overwrite object ID.
+  delete updateObject._id;
+  excludeFields.forEach(function(field) {
+    delete updateObject[field];
+  });
+  Object.assign(object, updateObject);
+};
 
 const parseFeed = function(feed, callback) {
   let podcast;

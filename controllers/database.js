@@ -452,10 +452,7 @@ module.exports.refreshAll = function() {
 
 const refreshPodcast = function(podcast) {
   return new Promise(function(resolve, reject) {
-    parseFeed(podcast.xmlurl, function(err, updatedPodcast) {
-      if (err) {
-        reject(err);
-      }
+    parseFeed(podcast.xmlurl).then(function(updatedPodcast) {
       const promises = updatedPodcast.episodes.map(function(episode) {
         return new Promise(function(resolve, reject) {
           updateEpisode(episode, function(err, updatedEpisode, isNew) {
@@ -479,11 +476,13 @@ const refreshPodcast = function(podcast) {
         });
       });
       Promise.all(promises).then(function(episodes) {
-        // Don't overwrite xml URL or episodes.
+      // Don't overwrite xml URL or episodes.
         updateObject(podcast, updatedPodcast, ['episodes', 'xmlurl']);
         podcast.save();
         resolve(podcast);
       });
+    }).catch(function(err) {
+      reject(err);
     });
   });
 };
@@ -498,60 +497,63 @@ const updateObject = function(object, update, excludeFields=[]) {
   Object.assign(object, updateObject);
 };
 
-const parseFeed = function(feed, callback) {
-  let podcast;
-  const feedparser = new FeedParser();
+const parseFeed = function(feed) {
+  return new Promise(function(resolve, reject) {
+    let podcast;
+    const feedparser = new FeedParser();
 
-  feedparser.on('error', function(err) {
-    this.destroy(err);
-  });
+    feedparser.on('error', function(err) {
+      this.destroy(err);
+      reject(err);
+    });
 
-  feedparser.on('meta', function(meta) {
-    podcast = new Podcast(this.meta);
-  });
+    feedparser.on('meta', function(meta) {
+      podcast = new Podcast(this.meta);
+    });
 
-  feedparser.on('readable', function() {
-    const stream = this;
-    while (item = stream.read()) {
-      const episode = new Episode(item);
-      if (item.enclosures) {
-        const enclosure = item.enclosures[0];
-        episode.enclosure = new Enclosure(enclosure);
+    feedparser.on('readable', function() {
+      const stream = this;
+      while (item = stream.read()) {
+        const episode = new Episode(item);
+        if (item.enclosures) {
+          const enclosure = item.enclosures[0];
+          episode.enclosure = new Enclosure(enclosure);
+        }
+        podcast.episodes.push(episode);
       }
-      podcast.episodes.push(episode);
-    }
-  });
+    });
 
-  feedparser.on('close', function(err) {
-    if (err) {
-      console.log(err);
-      callback(err, null);
-      return;
-    }
-    callback(null, podcast);
-    return;
-  });
-  feedparser.on('end', function(err) {
-    this.destroy();
-  });
-
-  request
-      .get(feed)
-      .on('error', function(err) {
-        console.log(err);
-        callback(err, null);
+    feedparser.on('close', function(err) {
+      if (err) {
+        reject(err);
         return;
-      })
-      .pipe(feedparser);
+      } else if (podcast) {
+        resolve(podcast);
+      } else {
+        reject(new Error('Failed to parse podcast.'));
+      }
+    });
+    feedparser.on('end', function(err) {
+      this.destroy();
+    });
+
+    request
+        .get(feed,
+            {
+              headers: {
+                'User-Agent': 'request',
+              },
+            }
+        )
+        .on('error', function(err) {
+          reject(err);
+          return;
+        }).pipe(feedparser);
+  });
 };
 
 module.exports.addPodcast = function(feed, price, btcPayServerInfo, callback) {
-  parseFeed(feed, function(err, podcast) {
-    if (err) {
-      console.log(err);
-      callback(err, null);
-      return;
-    }
+  parseFeed(feed).then(function(podcast) {
     if (podcast == null) {
       callback(new Error('Unable to add podcast.'));
       return;
@@ -576,5 +578,9 @@ module.exports.addPodcast = function(feed, price, btcPayServerInfo, callback) {
       }
       callback(null, podcast);
     });
+  }).catch(function(err) {
+    console.log(err);
+    callback(err, null);
+    return;
   });
 };

@@ -419,13 +419,12 @@ const updateEpisode = function(data, callback) {
           episode.save();
           episode.enclosure.save();
         } else if (data.date > episode.date) {
-          console.log(data.toObject());
           // Don't create a new enclosure
           if (episode.enclosure.url == data.enclosure.url) {
-            updateObject(episode, data, ['enclosure']);
+            updateObject(episode, data, ['enclosure', 'earned', 'listens']);
             episode.enclosure.save();
           } else {
-            updateObject(episode, data);
+            updateObject(episode, data, ['earned', 'listens']);
           }
           episode.save();
         }
@@ -476,8 +475,16 @@ const refreshPodcast = function(podcast) {
         });
       });
       Promise.all(promises).then(function(episodes) {
-      // Don't overwrite xml URL or episodes.
-        updateObject(podcast, updatedPodcast, ['episodes', 'xmlurl']);
+      // Don't overwrite xml URL, episodes or default fields.
+        updateObject(podcast, updatedPodcast,
+            [
+              'episodes',
+              'xmlurl',
+              'earned',
+              'btcPayServer',
+              'listens',
+              'price',
+            ]);
         podcast.save();
         resolve(podcast);
       });

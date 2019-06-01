@@ -67,7 +67,7 @@ EpisodeSchema.methods.getPodcast = function(callback) {
 };
 
 EpisodeSchema.methods.credit = function(value) {
-  this.earned += parseInt(value, 10);
+  this.earned += value;
   this.save();
   Podcast.findOne({'episodes': this._id}, function(err, podcast) {
     if (err) {
@@ -248,7 +248,7 @@ PodcastSchema.virtual('btcPayServer.nodeInfoUrl').get(function() {
 });
 
 PodcastSchema.methods.credit = function(value) {
-  this.earned += parseInt(value, 10);
+  this.earned += value;
   this.save();
   User.findOne({'owns': this._id}, function(err, owner) {
     if (err) {

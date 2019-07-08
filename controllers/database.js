@@ -347,6 +347,10 @@ UserSchema.methods.subscribe = function(podcastID, callback) {
   });
 };
 
+UserSchema.methods.checkIfPurchased = function(episodeId, callback) {
+  callback(null, true);
+};
+
 // Unsubscribe to a podcast by ID, if already subscribed. If the podcast is not
 // found, an error will be passed to callback.
 UserSchema.methods.unsubscribe = function(podcastID, callback) {

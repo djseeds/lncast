@@ -41,6 +41,7 @@
     "passport-local-mongoose": "^5.0.1",
     "prerender-node": "^3.2.1",
     "request": "^2.88.0",
+    "rss": "^1.2.2",
     "serve-favicon": "^2.5.0",
     "swagger-express-middleware": "^2.0.1",
     "swagger-ui-express": "^4.0.2",

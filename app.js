@@ -12,6 +12,7 @@ const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 
 const podcasts = require('./routes/podcasts');
+const rss = require('./routes/rss');
 const account = require('./routes/account');
 const db = require('./controllers/database');
 const sessionCtrl = require('./controllers/session');
@@ -19,6 +20,7 @@ const createSwaggerMiddleware = require('swagger-express-middleware');
 
 // Refresh all podcasts every 15 minutes.
 cron.schedule('*/15 * * * *', db.refreshAll);
+db.refreshAll();
 
 const app = express();
 
@@ -71,6 +73,7 @@ createSwaggerMiddleware(swaggerFile, app, (err, middleware) => {
   app.use('*', httpsRedirect());
 
   app.use('/api', podcasts);
+  app.use('/rss', rss);
   app.use('/api/account', account);
 
   app.post('/api/account/register', function(req, res, next) {

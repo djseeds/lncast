@@ -347,8 +347,37 @@ UserSchema.methods.subscribe = function(podcastID, callback) {
   });
 };
 
-UserSchema.methods.checkIfPurchased = function(episodeId, callback) {
-  callback(null, true);
+UserSchema.methods.checkIfPurchased = function(episodeId) {
+  const self = this;
+  return new Promise(function(resolve, reject) {
+    Episode.findById(episodeId).populate('enclosure')
+        .exec(function(err, episode) {
+          if (err) {
+            reject(err);
+          } else if (!episode) {
+            resolve();
+          } else {
+            // Select user's invoices where enclosure ID == enclosure._id
+            self.populate('invoices.invoice').populate('invoices.enclosure').execPopulate(function(err, self) {
+              if (err) {
+                reject(err);
+              } else {
+                self.invoices.filter(function(invoice) {
+                  return invoice.enclosure.id == episode.enclosure.id;
+                }).forEach(function(invoice) {
+                  // Check if any of them are completed.
+                  if (invoice.invoice.complete) {
+                    resolve(true);
+                  }
+                });
+                // If we got to here without resolving/rejecting promise,
+                // no completed invoices were found for this episode.
+                resolve(false);
+              }
+            });
+          }
+        });
+  });
 };
 
 // Unsubscribe to a podcast by ID, if already subscribed. If the podcast is not

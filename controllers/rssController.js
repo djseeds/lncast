@@ -23,21 +23,20 @@ module.exports.generateFeed = function(podcast, user, callback) {
             if (err) {
               reject(err);
             } else {
-              user.checkIfPurchased(episode._id, function(err, hasPurchased) {
-                if (err) {
-                  reject(err);
-                } else {
-                  resolve({
-                    title: episode.title,
-                    // eslint-disable-next-line max-len
-                    description: hasPurchased ? episode.description: generateDescription(podcast, episode, user),
-                    url: 'https://lncast.com/#!/podcast/' + podcast._id + '/' + episode._id,
-                    guid: episode.guid,
-                    categories: episode.categories,
-                    date: episode.date,
-                    enclosure: hasPurchased ? episode.enclosure : null,
-                  });
-                }
+              user.checkIfPurchased(episode._id).then(function(hasPurchased) {
+                resolve({
+                  // eslint-disable-next-line max-len
+                  title: hasPurchased ? episode.title : 'Unpurchased: ' + episode.title,
+                  // eslint-disable-next-line max-len
+                  description: hasPurchased ? episode.description: generateDescription(podcast, episode, user),
+                  url: 'https://lncast.com/#!/podcast/' + podcast._id + '/' + episode._id,
+                  guid: episode.guid,
+                  categories: episode.categories,
+                  date: episode.date,
+                  enclosure: hasPurchased ? episode.enclosure : null,
+                });
+              }).catch(function(err) {
+                reject(err);
               });
             }
           });
@@ -52,3 +51,15 @@ module.exports.generateFeed = function(podcast, user, callback) {
     callback(err);
   });
 };
+
+/**
+ * Generates an episode description with link for user to purchase the episode.
+ *
+ * @param {*} podcast
+ * @param {*} episode
+ * @param {*} user
+ * @return {string} an episode description
+ */
+function generateDescription(podcast, episode, user) {
+  return episode.description;
+}

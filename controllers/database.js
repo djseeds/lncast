@@ -565,6 +565,7 @@ module.exports.addPodcast = function(feed, price, btcPayServerInfo, callback) {
       callback(new Error('Unable to add podcast.'));
       return;
     }
+    podcast.xmlurl = feed;
     podcast.price = price;
     podcast.btcPayServer = btcPayServerInfo;
     podcast.episodes.forEach(function(episode) {

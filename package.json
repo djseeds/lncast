@@ -33,7 +33,7 @@
     "express-session": "^1.15.6",
     "feedparser": "^2.2.9",
     "flat": "^4.1.0",
-    "mongoose": "^5.4.16",
+    "mongoose": "^5.7.5",
     "morgan": "^1.9.1",
     "ngclipboard": "^2.0.0",
     "node-cron": "^2.0.3",

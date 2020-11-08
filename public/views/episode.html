@@ -15,7 +15,6 @@
 
 <div id="episode" class="m-3">
     <h2>{{episode.title}}</h2>
-    <p class="mb-2" ng-bind-html="episode.description"></p>
     <div ng-if="episode.unlocked" ng-cloak>
         <audio controls autoplay><source src="{{episode.enclosure.url}}"></audio>
     </div>
@@ -61,4 +60,6 @@
             </div>
         </div>
     </div>
+    <h3>Episode Description</h3>
+    <p class="mb-2" ng-bind-html="episode.description"></p>
 </div>

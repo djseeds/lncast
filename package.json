@@ -32,7 +32,7 @@
     "express-https-redirect": "^1.0.0",
     "express-session": "^1.15.6",
     "feedparser": "^2.2.9",
-    "flat": "^4.1.0",
+    "flat": "^5.0.1",
     "mongoose": "^5.7.5",
     "morgan": "^1.9.1",
     "ngclipboard": "^2.0.0",
